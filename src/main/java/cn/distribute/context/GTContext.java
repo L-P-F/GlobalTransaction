@@ -41,9 +41,22 @@ public class GTContext
     {
         setXid(xid);
         List<BT> BTList = new ArrayList<>();
-        BT bt = BT.builder().xid(xid).status(StatusEnum.BEGIN).build();
+        BT bt = BT.builder()
+                .xid(xid)
+                .status(StatusEnum.START.getCode())
+                .build();
         setBT(bt);
         BTList.add(bt);
         GTList.put(xid,BTList);
+    }
+
+    public static void appendBT(String xid)
+    {
+        List<BT> BTList = GTList.get(xid);
+        BT bt = BT.builder()
+                .xid(xid)
+                .executeOrder(BTList.size())
+                .status(StatusEnum.START.getCode())
+                .build();
     }
 }

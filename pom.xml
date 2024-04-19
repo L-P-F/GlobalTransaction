@@ -16,7 +16,7 @@
         <aspectj>1.9.4</aspectj>
         <lombok.version>1.18.20</lombok.version>
         <fastjson>1.2.70</fastjson>
-        <okhttp>4.9.1</okhttp>
+        <http-client>4.5.13</http-client>
     </properties>
     <dependencyManagement>
         <dependencies>
@@ -74,6 +74,12 @@
             <groupId>com.alibaba</groupId>
             <artifactId>fastjson</artifactId>
             <version>${fastjson}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpclient</artifactId>
+            <version>${http-client}</version>
             <optional>true</optional>
         </dependency>
     </dependencies>

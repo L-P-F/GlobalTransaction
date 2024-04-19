@@ -9,7 +9,7 @@ import lombok.Getter;
 public enum StatusEnum
 {
     UNKNOWN(-1,"未知"),
-    BEGIN(0,"开始"),
+    START(0,"开始"),
     COMMIT(1,"提交"),
     ROLLBACK(2,"回滚");
 
