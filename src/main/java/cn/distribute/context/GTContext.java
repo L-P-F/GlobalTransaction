@@ -4,6 +4,7 @@ import cn.distribute.entity.BT;
 import cn.distribute.enums.StatusEnum;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -45,6 +46,7 @@ public class GTContext
                 .xid(xid)
                 .bid(xid + "-0")
                 .status(StatusEnum.START.getCode())
+                .sqlData(new HashSet<>())
                 .build();
         setBT(bt);
         BTList.add(bt);
@@ -59,6 +61,7 @@ public class GTContext
                 .bid(xid + "-" + BTList.size())
                 .status(StatusEnum.START.getCode())
                 .executeOrder(BTList.size())
+                .sqlData(new HashSet<>())
                 .build();
         setBT(bt);
         BTList.add(bt);

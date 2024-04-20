@@ -32,7 +32,7 @@ public class SQLInterceptor implements Interceptor
         if (GTContext.getXid() == null)
             return invocation.proceed();//不拦截全局事务以外调用的sql语句
         String sql = resolveSqlWithParameters(invocation);
-        log.debug("SQL: ==> {}", sql);
+        log.info("SQL:==> {}", sql);
         return invocation.proceed();
     }
 

@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import org.apache.ibatis.mapping.SqlCommandType;
 
 import java.util.HashMap;
+import java.util.Set;
 
 /*2024-04-18 16:57
  * Author: Aurora
@@ -20,7 +21,7 @@ public class BT
 {
     private String bid; //分支事务id ,分支事务执行顺序
     private String xid; //全局事务id
-    private int executeOrder; //分支事务执行顺序
     private int status; //分支事务状态
-    private HashMap<SqlCommandType, String> sqlData; //当前分支事务执行过的所有sql语句的undo_log
+    private int executeOrder; //分支事务执行顺序
+    private Set<String> sqlData; //当前分支事务执行过的所有sql语句的undo_log
 }
