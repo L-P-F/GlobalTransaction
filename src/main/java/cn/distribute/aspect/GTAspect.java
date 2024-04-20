@@ -1,6 +1,7 @@
 package cn.distribute.aspect;
 
 import cn.distribute.context.GTContext;
+import cn.distribute.entity.BT;
 import cn.distribute.entity.Result;
 import cn.distribute.enums.HTTPEnum;
 import com.alibaba.fastjson.JSON;
@@ -23,6 +24,7 @@ import org.aspectj.lang.annotation.Pointcut;
 import org.aspectj.lang.reflect.MethodSignature;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.UUID;
 
 /*2024-04-17 14:35
@@ -44,7 +46,7 @@ public class GTAspect
         String xid = UUID.randomUUID().toString();
         log.info("开始全局事务,{}", xid);
         GTContext.GTInit(xid);
-        save(xid);
+        saveBranch(xid);
         return point.proceed();
     }
 
@@ -54,10 +56,13 @@ public class GTAspect
         if (GTContext.getXid() != null)
         {
             String xid = GTContext.getXid();
-            get(xid);
+            getBranch(xid);
             MethodSignature ms = (MethodSignature) point.getSignature();
             log.info("执行分支事务：{}", ms.getMethod().getName());
             log.info("隶属于全局事务：{}", xid);
+            GTContext.appendBT(xid);
+            saveBranch(xid);
+
         }
         return point.proceed();
     }
@@ -75,33 +80,32 @@ public class GTAspect
         log.error("分支事务异常：{}", e.getMessage());
     }
 
-    private void save(String xid)
+    private void saveBranch(String xid)
     {
         String jsonBody = JSON.toJSONString(GTContext.GTList.get(xid));
-
+        log.info("保存分支事务请求体: {}", jsonBody);
         try (CloseableHttpClient httpClient = HttpClients.createDefault())
         {
             HttpPost httpPost = new HttpPost(HTTPEnum.SAVE.getUrl());
             StringEntity entity = new StringEntity(jsonBody, ContentType.APPLICATION_JSON);
             httpPost.setEntity(entity);
-
             try (CloseableHttpResponse response = httpClient.execute(httpPost))
             {
                 HttpEntity responseEntity = response.getEntity();
                 if (responseEntity != null)
                 {
                     String responseBody = EntityUtils.toString(responseEntity);
-                    log.info("response body: {}", responseBody);
+                    log.info("保存分支事务响应体: {}", responseBody);
                 } else
-                    log.info("No response body received.");
+                    log.error("保存没有响应.");
             }
         } catch (IOException e)
         {
-            log.error("Error getting data: {}", e.getMessage());
+            log.error("保存Error getting data: {}", e.getMessage());
         }
     }
 
-    private void get(String xid)
+    private void getBranch(String xid)
     {
         try (CloseableHttpClient httpClient = HttpClients.createDefault())
         {
@@ -112,16 +116,16 @@ public class GTAspect
                 if (responseEntity != null)
                 {
                     String responseBody = EntityUtils.toString(responseEntity);
-                    log.info("response body: {}", responseBody);
+                    log.info("拉取分支事务响应体: {}", responseBody);
                     Result result = JSON.parseObject(responseBody, Result.class);
-                    log.info(result.getMessage());
-//                    GTContext.GTList.put(xid,)
+                    List<BT> btList = JSON.parseArray(result.getContent().toString(), BT.class);
+                    GTContext.GTList.put(xid,btList);
                 } else
-                    log.info("No response body received.");
+                    log.error("拉取没有响应.");
             }
         } catch (IOException e)
         {
-            log.error("Error getting data: {}", e.getMessage());
+            log.error("拉取Error getting data: {}", e.getMessage());
         }
     }
 }
