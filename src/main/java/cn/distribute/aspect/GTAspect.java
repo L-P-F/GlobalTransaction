@@ -49,8 +49,7 @@ public class GTAspect
         {
             HTTPUtil.getBranch(xid);
             MethodSignature ms = (MethodSignature) point.getSignature();
-            log.info("执行分支事务：{}", ms.getMethod().getName());
-            log.info("隶属于全局事务：{}", xid);
+            log.info("分支事务开启：{}，隶属于全局事务：{}", ms.getMethod().getName(),xid);
             GTContext.appendBT(xid);
             HTTPUtil.saveBranch(xid);
         }
