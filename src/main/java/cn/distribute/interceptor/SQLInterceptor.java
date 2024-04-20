@@ -33,6 +33,7 @@ public class SQLInterceptor implements Interceptor
             return invocation.proceed();//不拦截全局事务以外调用的sql语句
         String sql = resolveSqlWithParameters(invocation);
         log.info("SQL:==> {}", sql);
+        GTContext.getBT().getSqlData().add(sql); //将拦截的sql装入当前线程的BT
         return invocation.proceed();
     }
 

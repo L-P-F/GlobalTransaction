@@ -4,7 +4,7 @@ import cn.distribute.entity.BT;
 import cn.distribute.enums.StatusEnum;
 
 import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -16,7 +16,6 @@ public class GTContext
     private static final ThreadLocal<BT> CURRENT_BT = new ThreadLocal<>();
     private static final ThreadLocal<String> XID_THREAD_LOCAL = new ThreadLocal<>();
     public static final ConcurrentHashMap<String, List<BT>> GTList = new ConcurrentHashMap<>();
-
 
     public static void setXid(String xid)
     {
@@ -46,9 +45,9 @@ public class GTContext
                 .xid(xid)
                 .bid(xid + "-0")
                 .status(StatusEnum.START.getCode())
-                .sqlData(new HashSet<>())
+                .sqlData(new LinkedHashSet<>())
                 .build();
-        setBT(bt);
+        setBT(bt); //当前线程本地BT改为当前BT
         BTList.add(bt);
         GTList.put(xid,BTList);
     }
@@ -61,9 +60,9 @@ public class GTContext
                 .bid(xid + "-" + BTList.size())
                 .status(StatusEnum.START.getCode())
                 .executeOrder(BTList.size())
-                .sqlData(new HashSet<>())
+                .sqlData(new LinkedHashSet<>())
                 .build();
-        setBT(bt);
+        setBT(bt); //当前线程本地BT改为当前BT
         BTList.add(bt);
     }
 }

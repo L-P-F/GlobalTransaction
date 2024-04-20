@@ -11,11 +11,10 @@ import java.io.IOException;
 /*
 2024-04-18 12:15
  * Author: Aurora
-拦截发送进来的feign请求,拦截器需要用户在自己的项目中注册
+拦截发送进来的feign请求,拦截器需要用户在自己的项目中注册,拦截所有路径即可
  */
 public class GTFeignReqReceive implements HandlerInterceptor
 {
-
     @Override
     public boolean preHandle(HttpServletRequest req, HttpServletResponse res, Object o) throws IOException
     {
