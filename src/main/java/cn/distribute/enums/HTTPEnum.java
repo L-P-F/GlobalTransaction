@@ -8,7 +8,7 @@ import lombok.Getter;
 @Getter
 public enum HTTPEnum
 {
-    SAVE("http://localhost:8573/save"),
+    SAVE("http://localhost:8573/save/"),
     GET("http://localhost:8573/get/");
 
     private final String url;

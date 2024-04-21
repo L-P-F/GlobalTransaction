@@ -42,7 +42,6 @@ public class SQLInterceptor implements Interceptor
     {
         Object[] args = invocation.getArgs();
         MappedStatement mappedStatement = (MappedStatement) args[0];
-        GTContext.getBT().getSqlData().add(mappedStatement.getSqlCommandType().name()); //将操作类型装入当前线程的BT的sqlData
         Object parameter = args[1];
 
         BoundSql boundSql = mappedStatement.getBoundSql(parameter);
@@ -88,7 +87,7 @@ public class SQLInterceptor implements Interceptor
                 }
             }
         }
-        return sql;
+        return mappedStatement.getSqlCommandType().name().concat("->").concat(sql);
     }
 
     private String getParameterValue(Object obj)

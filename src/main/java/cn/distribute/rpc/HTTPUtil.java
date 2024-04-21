@@ -27,11 +27,11 @@ public class HTTPUtil
 {
     public static void saveBranch(String xid)
     {
-        String jsonBody = JSON.toJSONString(GTContext.GTList.get(xid));
+        String jsonBody = JSON.toJSONString(GTContext.getBT());
         log.info("保存分支事务请求体: {}", jsonBody);
         try (CloseableHttpClient httpClient = HttpClients.createDefault())
         {
-            HttpPost httpPost = new HttpPost(HTTPEnum.SAVE.getUrl());
+            HttpPost httpPost = new HttpPost(HTTPEnum.SAVE.getUrl() + xid);
             StringEntity entity = new StringEntity(jsonBody, ContentType.APPLICATION_JSON);
             httpPost.setEntity(entity);
             try (CloseableHttpResponse response = httpClient.execute(httpPost))

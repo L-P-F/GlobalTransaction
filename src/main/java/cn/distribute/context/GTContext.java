@@ -3,7 +3,6 @@ package cn.distribute.context;
 import cn.distribute.entity.BT;
 import cn.distribute.enums.StatusEnum;
 
-import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
@@ -40,29 +39,16 @@ public class GTContext
     public static void GTInit(String xid)
     {
         setXid(xid);
-        List<BT> BTList = new ArrayList<>();
-        BT bt = BT.builder()
-                .xid(xid)
-                .bid(xid + "-0")
-                .status(StatusEnum.START.getCode())
-                .sqlData(new LinkedHashSet<>())
-                .build();
-        setBT(bt); //当前线程本地BT改为当前BT
-        BTList.add(bt);
-        GTList.put(xid,BTList);
+        BTInit(xid);
     }
 
-    public static void appendBT(String xid)
+    public static void BTInit(String xid)
     {
-        List<BT> BTList = GTList.get(xid);
         BT bt = BT.builder()
                 .xid(xid)
-                .bid(xid + "-" + BTList.size())
                 .status(StatusEnum.START.getCode())
-                .executeOrder(BTList.size())
                 .sqlData(new LinkedHashSet<>())
                 .build();
         setBT(bt); //当前线程本地BT改为当前BT
-        BTList.add(bt);
     }
 }

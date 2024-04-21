@@ -32,7 +32,7 @@ public class GTAspect
         String xid = UUID.randomUUID().toString();
         log.info("开始全局事务,{}", xid);
         GTContext.GTInit(xid);
-        HTTPUtil.saveBranch(xid);
+        // HTTPUtil.saveBranch(xid); todo 也没必要
 
         Object result = point.proceed();
 
@@ -47,11 +47,10 @@ public class GTAspect
         String xid = GTContext.getXid();
         if (xid != null)
         {
-            HTTPUtil.getBranch(xid);
             MethodSignature ms = (MethodSignature) point.getSignature();
             log.info("分支事务开启：{}，隶属于全局事务：{}", ms.getMethod().getName(),xid);
-            GTContext.appendBT(xid);
-            HTTPUtil.saveBranch(xid);
+            GTContext.BTInit(xid);
+            //HTTPUtil.saveBranch(xid);  todo 感觉也没必要
         }
 
         Object result = point.proceed();

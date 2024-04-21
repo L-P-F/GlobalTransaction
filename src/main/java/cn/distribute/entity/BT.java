@@ -21,5 +21,5 @@ public class BT
     private String xid; //全局事务id
     private int status; //分支事务状态
     private int executeOrder; //分支事务执行顺序
-    private LinkedHashSet<String> sqlData; //使用LinkedHashSet保证元素的顺序;当前分支事务执行过的所有sql语句;偶数存放操作类型,奇数存放前一个操作类型的具体sql
+    private LinkedHashSet<String> sqlData; //使用LinkedHashSet保证元素的顺序;当前分支事务执行过的所有sql语句;
 }
