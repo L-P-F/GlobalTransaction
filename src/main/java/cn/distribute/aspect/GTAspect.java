@@ -36,7 +36,7 @@ public class GTAspect
 
         Object result = point.proceed();
 
-        HTTPUtil.saveBranch(xid);
+        //HTTPUtil.saveBranch(xid); todo 感觉没必要，有待商榷
 
         return result;
     }

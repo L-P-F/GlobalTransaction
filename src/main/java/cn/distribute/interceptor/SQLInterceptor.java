@@ -33,7 +33,7 @@ public class SQLInterceptor implements Interceptor
             return invocation.proceed();//不拦截全局事务以外调用的sql语句
         String sql = resolveSqlWithParameters(invocation);
         log.info("SQL:==> {}", sql);
-        GTContext.getBT().getSqlData().add(sql); //将拦截的sql装入当前线程的BT
+        GTContext.getBT().getSqlData().add(sql); //将拦截的sql装入当前线程的BT的sqlData
         return invocation.proceed();
     }
 
@@ -42,6 +42,7 @@ public class SQLInterceptor implements Interceptor
     {
         Object[] args = invocation.getArgs();
         MappedStatement mappedStatement = (MappedStatement) args[0];
+        GTContext.getBT().getSqlData().add(mappedStatement.getSqlCommandType().name()); //将操作类型装入当前线程的BT的sqlData
         Object parameter = args[1];
 
         BoundSql boundSql = mappedStatement.getBoundSql(parameter);
@@ -92,9 +93,9 @@ public class SQLInterceptor implements Interceptor
 
     private String getParameterValue(Object obj)
     {
-        String value = null;
+        String value;
         if (obj instanceof String)
-            value = "'" + obj.toString() + "'";
+            value = "'" + obj + "'";
         else
         {
             if (obj != null)
