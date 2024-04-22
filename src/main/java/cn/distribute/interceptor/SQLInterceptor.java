@@ -1,6 +1,7 @@
 package cn.distribute.interceptor;
 
 import cn.distribute.context.GTContext;
+import com.baomidou.mybatisplus.core.metadata.TableInfoHelper;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.ibatis.executor.Executor;
@@ -14,6 +15,8 @@ import org.apache.ibatis.type.TypeHandlerRegistry;
 
 import java.util.List;
 import java.util.Properties;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 /*2024-04-17 16:10
  * Author: Aurora
  */
@@ -35,6 +38,24 @@ public class SQLInterceptor implements Interceptor
         log.info("SQL:==> {}", sql);
         GTContext.getBT().getSqlData().add(sql); //将拦截的sql装入当前线程的BT的sqlData
         return invocation.proceed();
+    }
+
+    public String getTableName(String sql)
+    {
+        String regex = "\\b(?:INSERT\\s+INTO\\s+(\\w+)|DELETE\\s+FROM\\s+(\\w+)|UPDATE\\s+(\\w+)\\s+SET)\\b";
+        Pattern pattern = Pattern.compile(regex, Pattern.CASE_INSENSITIVE);
+        Matcher matcher = pattern.matcher(sql);
+        if (matcher.find())
+            for (int i = 1; i <= 3; i++)
+                if (matcher.group(i) != null)
+                    return matcher.group(i);
+        return null;
+    }
+
+    private String getBean(String sql)
+    {
+        // 获取表对应的实体类名
+        return TableInfoHelper.getTableInfo(getTableName(sql)).getEntityType().toString();
     }
 
     @SneakyThrows
@@ -87,7 +108,7 @@ public class SQLInterceptor implements Interceptor
                 }
             }
         }
-        return mappedStatement.getSqlCommandType().name().concat("->").concat(sql);
+        return mappedStatement.getSqlCommandType().name().concat("->").concat(sql).concat("->").concat(getBean(sql));
     }
 
     private String getParameterValue(Object obj)
