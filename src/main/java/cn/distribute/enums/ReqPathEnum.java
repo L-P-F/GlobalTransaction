@@ -6,14 +6,14 @@ import lombok.Getter;
  * Author: Aurora
  */
 @Getter
-public enum HTTPEnum
+public enum ReqPathEnum
 {
-    SAVE("http://localhost:8573/save/"),
-    GET("http://localhost:8573/get/");
+    HTTP_SAVE("http://localhost:8573/save/"),
+    WEB_SOCKET_COMMIT("ws://localhost:8573/ws/");
 
     private final String url;
 
-    HTTPEnum(String url)
+    ReqPathEnum(String url)
     {
         this.url = url;
     }
