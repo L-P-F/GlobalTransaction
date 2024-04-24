@@ -3,9 +3,7 @@ package cn.distribute.config;
 import cn.distribute.aspect.GTAspect;
 import cn.distribute.interceptor.GTFeignReqReceive;
 import cn.distribute.interceptor.GTFeignReqSend;
-import cn.distribute.interceptor.SQLInterceptor;
 import cn.distribute.rpc.SocketClient;
-import org.apache.ibatis.session.SqlSessionFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -30,21 +28,6 @@ public class GTBeansAutoConfigure
     public GTFeignReqReceive feignReqReceive()
     {
         return new GTFeignReqReceive();
-    }
-
-    @Bean
-    protected SQLInterceptor sqlInterceptor()
-    {
-        return new SQLInterceptor();
-    }
-
-    @Bean
-    @ConditionalOnBean(SQLInterceptor.class)
-    public Boolean setAutoFillValueInterceptor(SqlSessionFactory sqlSessionFactory, SQLInterceptor sqlInterceptor)
-    {
-        org.apache.ibatis.session.Configuration configuration = sqlSessionFactory.getConfiguration();
-        configuration.addInterceptor(sqlInterceptor);
-        return Boolean.TRUE;
     }
 
     @Bean

@@ -48,8 +48,10 @@ public class GTAspect
         String xid = UUID.randomUUID().toString();
         log.info("开始全局事务,{}", xid);
         GTContext.GTInit(xid, status);
+
         Object result = point.proceed();
 
+        //同步对接服务器,等待服务器通知commit OR rollback
         GTCommitOrRollback(StatusEnum.TRUE, status);
 
         return result;
@@ -61,6 +63,8 @@ public class GTAspect
         DefaultTransactionDefinition definition = new DefaultTransactionDefinition();
         //开启事务
         TransactionStatus status = Objects.requireNonNull(transactionTemplate.getTransactionManager()).getTransaction(definition);
+        //提前存储事务所需的绑定资源
+        GTContext.setTransactionResource(TransactionResource.copyTransactionResource());
 
         String xid = GTContext.getXid();
         if (xid != null)
@@ -75,8 +79,7 @@ public class GTAspect
         if (xid != null)
         {
             HTTPUtil.saveBranch(xid);
-            GTContext.setTransactionResource(TransactionResource.copyTransactionResource());
-            System.out.println(GTContext.getTransactionResource());
+            //异步对接服务器,等待服务器通知commit OR rollback
             BTCommitOrRollback(StatusEnum.TRUE, status, GTContext.getTransactionResource());
         }
 

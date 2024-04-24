@@ -5,8 +5,6 @@ import cn.distribute.entity.TransactionResource;
 import cn.distribute.enums.StatusEnum;
 import org.springframework.transaction.TransactionStatus;
 
-import java.util.LinkedHashSet;
-
 /*2024-04-18 10:59
  * Author: Aurora
  */
@@ -65,7 +63,7 @@ public class GTContext
                 .xid(xid)
                 .status(StatusEnum.START.getCode())
                 .transactionStatus(status)
-                .sqlData(new LinkedHashSet<>())
+                //.sqlData(new LinkedHashSet<>())
                 .build();
         setBT(bt); //当前线程本地BT改为当前BT
     }

@@ -4,7 +4,6 @@ import cn.distribute.entity.TransactionResource;
 import cn.distribute.enums.ReqPathEnum;
 import cn.distribute.enums.StatusEnum;
 import jakarta.websocket.*;
-import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Scope;
 import org.springframework.scheduling.annotation.Async;
@@ -20,10 +19,9 @@ import java.util.Objects;
  * Author: Aurora
  */
 
-@ClientEndpoint
 @Slf4j
-@Getter
-@Scope("prototype")
+@Scope("prototype")//每次创建新的socketClient防止并发出现数据安全问题
+@ClientEndpoint
 public class SocketClient
 {
     private Session session;
@@ -51,12 +49,10 @@ public class SocketClient
         log.warn("关闭连接,当前分支事务结束");
     }
 
-    public void send(String message) throws IOException
-    {
-        this.session.getBasicRemote().sendText(message);
-    }
-
-    public void close()
+    /**
+     * 关闭websocket连接
+     */
+    private void close()
     {
         if (session != null && session.isOpen())
             try
@@ -68,7 +64,7 @@ public class SocketClient
             }
     }
 
-    public void BTJudgeMessage(TransactionTemplate transactionTemplate, TransactionStatus status,
+    private void BTJudgeMessage(TransactionTemplate transactionTemplate, TransactionStatus status,
                                TransactionResource transactionResource)
     {
         log.warn("收到服务器指令{},执行操作...", latestMessage);
@@ -80,7 +76,7 @@ public class SocketClient
         transactionResource.removeTransactionResource();
     }
 
-    public void GTJudgeMessage(TransactionTemplate transactionTemplate, TransactionStatus status)
+    private void GTJudgeMessage(TransactionTemplate transactionTemplate, TransactionStatus status)
     {
         log.warn("收到服务器指令{},执行操作...", latestMessage);
         if (StatusEnum.TRUE.getMsg().equals(latestMessage))
@@ -90,7 +86,7 @@ public class SocketClient
     }
 
 
-    public void connectToServer(String executeStatus, String xid, TransactionTemplate transactionTemplate,
+    private void connectToServer(String executeStatus, String xid, TransactionTemplate transactionTemplate,
                                 TransactionStatus status, TransactionResource transactionResource)
     {
         try
@@ -99,7 +95,7 @@ public class SocketClient
             WebSocketContainer container = ContainerProvider.getWebSocketContainer();
             container.connectToServer(this, uri);
             container.setDefaultMaxSessionIdleTimeout(5000L);
-            send(executeStatus);
+            session.getBasicRemote().sendText(executeStatus);
             Thread.sleep(100);
             if (transactionResource == null)
                 GTJudgeMessage(transactionTemplate, status);
