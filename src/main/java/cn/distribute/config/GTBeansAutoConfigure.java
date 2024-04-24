@@ -4,11 +4,9 @@ import cn.distribute.aspect.GTAspect;
 import cn.distribute.interceptor.GTFeignReqReceive;
 import cn.distribute.interceptor.GTFeignReqSend;
 import cn.distribute.interceptor.SQLInterceptor;
-import cn.distribute.properties.DatasourceProperties;
 import cn.distribute.rpc.SocketClient;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
@@ -20,7 +18,6 @@ import org.springframework.transaction.support.TransactionTemplate;
  */
 @Configuration
 @EnableAsync
-@EnableConfigurationProperties(DatasourceProperties.class)
 public class GTBeansAutoConfigure
 {
     @Bean

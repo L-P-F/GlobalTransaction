@@ -1,8 +1,8 @@
 package cn.distribute.context;
 
 import cn.distribute.entity.BT;
+import cn.distribute.entity.TransactionResource;
 import cn.distribute.enums.StatusEnum;
-import com.zaxxer.hikari.HikariDataSource;
 import org.springframework.transaction.TransactionStatus;
 
 import java.util.LinkedHashSet;
@@ -14,8 +14,7 @@ public class GTContext
 {
     private static final ThreadLocal<BT> CURRENT_BT = new ThreadLocal<>();
     private static final ThreadLocal<String> XID_THREAD_LOCAL = new ThreadLocal<>();
-    private static final ThreadLocal<Boolean> TRANSACTION_COMPLETED = new ThreadLocal<>();
-    private static final ThreadLocal<HikariDataSource> dataSourceThreadLocal = new ThreadLocal<>();
+    private static final ThreadLocal<TransactionResource> TRANSACTION_RESOURCE_THREAD_LOCAL = new ThreadLocal<>();
 
     public static void setXid(String xid)
     {
@@ -37,38 +36,27 @@ public class GTContext
         return CURRENT_BT.get();
     }
 
-    public static void setTransactionCompleted(Boolean status)
+    public static void setTransactionResource(TransactionResource transactionResource)
     {
-        TRANSACTION_COMPLETED.set(status);
+        TRANSACTION_RESOURCE_THREAD_LOCAL.set(transactionResource);
     }
 
-    public static Boolean getTransactionCompleted()
+    public static TransactionResource getTransactionResource()
     {
-        return TRANSACTION_COMPLETED.get();
-    }
-
-    public static void setDataSource(HikariDataSource dataSource)
-    {
-        dataSourceThreadLocal.set(dataSource);
-    }
-
-    public static HikariDataSource getDataSource()
-    {
-        return dataSourceThreadLocal.get();
+        return TRANSACTION_RESOURCE_THREAD_LOCAL.get();
     }
 
     public static void remove()
     {
         CURRENT_BT.remove();
         XID_THREAD_LOCAL.remove();
-        TRANSACTION_COMPLETED.remove();
-        dataSourceThreadLocal.remove();
+        TRANSACTION_RESOURCE_THREAD_LOCAL.remove();
     }
 
-    public static void GTInit(String xid,TransactionStatus status)
+    public static void GTInit(String xid, TransactionStatus status)
     {
         setXid(xid);
-        BTInit(xid,status);
+        BTInit(xid, status);
     }
 
     public static void BTInit(String xid, TransactionStatus status)

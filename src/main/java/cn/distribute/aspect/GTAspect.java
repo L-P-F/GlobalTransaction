@@ -1,11 +1,11 @@
 package cn.distribute.aspect;
 
 import cn.distribute.context.GTContext;
+import cn.distribute.entity.TransactionResource;
 import cn.distribute.enums.StatusEnum;
 import cn.distribute.rpc.HTTPUtil;
 import cn.distribute.rpc.SocketClient;
 import lombok.extern.slf4j.Slf4j;
-import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.AfterThrowing;
 import org.aspectj.lang.annotation.Around;
@@ -14,8 +14,10 @@ import org.aspectj.lang.annotation.Pointcut;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.support.DefaultTransactionDefinition;
 import org.springframework.transaction.support.TransactionTemplate;
 
+import java.util.Objects;
 import java.util.UUID;
 
 /*2024-04-17 14:35
@@ -39,14 +41,16 @@ public class GTAspect
     @Around("GTCut()") //本身也是一个分支事务
     public Object GTStart(ProceedingJoinPoint point) throws Throwable
     {
-        TransactionStatus status = transactionTemplate.getTransactionManager().getTransaction(transactionTemplate);
+        DefaultTransactionDefinition definition = new DefaultTransactionDefinition();
+        //开启事务
+        TransactionStatus status = Objects.requireNonNull(transactionTemplate.getTransactionManager()).getTransaction(definition);
 
         String xid = UUID.randomUUID().toString();
         log.info("开始全局事务,{}", xid);
-        GTContext.GTInit(xid,status);
+        GTContext.GTInit(xid, status);
         Object result = point.proceed();
 
-        commitOrRollback(StatusEnum.TRUE,status);
+        GTCommitOrRollback(StatusEnum.TRUE, status);
 
         return result;
     }
@@ -54,49 +58,53 @@ public class GTAspect
     @Around("BTCut()")
     public Object BTExecute(ProceedingJoinPoint point) throws Throwable
     {
-        TransactionStatus status = transactionTemplate.getTransactionManager().getTransaction(transactionTemplate);
+        DefaultTransactionDefinition definition = new DefaultTransactionDefinition();
+        //开启事务
+        TransactionStatus status = Objects.requireNonNull(transactionTemplate.getTransactionManager()).getTransaction(definition);
 
         String xid = GTContext.getXid();
         if (xid != null)
         {
             MethodSignature ms = (MethodSignature) point.getSignature();
-            log.info("分支事务开启：{}，隶属于全局事务：{}", ms.getMethod().getName(),xid);
-            GTContext.BTInit(xid,status);
+            log.info("分支事务开启：{}，隶属于全局事务：{}", ms.getMethod().getName(), xid);
+            GTContext.BTInit(xid, status);
         }
 
         Object result = point.proceed();
 
-        if(xid != null)
+        if (xid != null)
         {
             HTTPUtil.saveBranch(xid);
-            commitOrRollback(StatusEnum.TRUE,status);
+            GTContext.setTransactionResource(TransactionResource.copyTransactionResource());
+            System.out.println(GTContext.getTransactionResource());
+            BTCommitOrRollback(StatusEnum.TRUE, status, GTContext.getTransactionResource());
         }
 
         return result;
     }
 
     @AfterThrowing(pointcut = "GTCut()", throwing = "e")
-    public void GTException(JoinPoint point, Throwable e)
+    public void GTException(Throwable e)
     {
-        log.error("全局事务异常：{}", e.getMessage());
-        log.info("全局事务ID：{}", GTContext.getXid());
-        GTContext.getBT().setStatus(StatusEnum.ROLLBACK.getCode());
-        HTTPUtil.saveBranch(GTContext.getXid());
-        commitOrRollback(StatusEnum.FALSE,GTContext.getBT().getTransactionStatus());
+        log.error("全局事务异常：{},id：{}", e.getMessage(), GTContext.getXid());
+        GTCommitOrRollback(StatusEnum.FALSE, GTContext.getBT().getTransactionStatus());
     }
 
     @AfterThrowing(pointcut = "BTCut()", throwing = "e")
-    public void BTException(JoinPoint point,Throwable e)
+    public void BTException(Throwable e)
     {
-        log.error("分支事务异常：{}", e.getMessage());
-        GTContext.getBT().setStatus(StatusEnum.ROLLBACK.getCode());
-        HTTPUtil.saveBranch(GTContext.getXid());
-        commitOrRollback(StatusEnum.FALSE,GTContext.getBT().getTransactionStatus());
+        log.error("分支事务异常：{}，隶属于全局事务：{}", e.getMessage(), GTContext.getXid());
+        BTCommitOrRollback(StatusEnum.FALSE, GTContext.getBT().getTransactionStatus(), GTContext.getTransactionResource());
     }
 
 
-    protected void commitOrRollback(StatusEnum statusEnum,TransactionStatus status)
+    private void GTCommitOrRollback(StatusEnum statusEnum, TransactionStatus status)
     {
-        socketClient.connectToServer(statusEnum.getMsg(),GTContext.getXid(),transactionTemplate,status);
+        socketClient.GTTryToConnect(statusEnum.getMsg(), GTContext.getXid(), transactionTemplate, status);
+    }
+
+    private void BTCommitOrRollback(StatusEnum statusEnum, TransactionStatus status, TransactionResource transactionResource)
+    {
+        socketClient.BTTryToConnect(statusEnum.getMsg(), GTContext.getXid(), transactionTemplate, status, transactionResource);
     }
 }
