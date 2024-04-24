@@ -1,9 +1,11 @@
 package cn.distribute.entity;
 
+import com.alibaba.fastjson.annotation.JSONField;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.transaction.TransactionStatus;
 
 import java.util.LinkedHashSet;
 
@@ -21,5 +23,7 @@ public class BT
     private String xid; //全局事务id
     private int status; //分支事务状态
     private int executeOrder; //分支事务执行顺序
+    @JSONField(serialize = false)
+    private TransactionStatus transactionStatus; //事务状态
     private LinkedHashSet<String> sqlData; //使用LinkedHashSet保证元素的顺序;当前分支事务执行过的所有sql语句;
 }

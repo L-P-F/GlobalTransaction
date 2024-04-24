@@ -1,11 +1,14 @@
 package cn.distribute.rpc;
 
-import cn.distribute.context.GTContext;
 import cn.distribute.enums.ReqPathEnum;
+import cn.distribute.enums.StatusEnum;
 import jakarta.websocket.*;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Scope;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.io.IOException;
 import java.net.URI;
@@ -21,7 +24,6 @@ import java.time.LocalDateTime;
 @Scope("prototype")
 public class SocketClient
 {
-
     private Session session;
 
     private String latestMessage;
@@ -47,9 +49,9 @@ public class SocketClient
         log.warn("关闭连接,当前分支事务结束");
     }
 
-    public void send(Boolean message)
+    public void send(String message)
     {
-        this.session.getAsyncRemote().sendText(message.toString());
+        this.session.getAsyncRemote().sendText(message);
     }
 
     public void close()
@@ -62,16 +64,28 @@ public class SocketClient
             }
     }
 
-    public void connectToServer(Boolean executeStatus)
+    public void judgeMessage(TransactionTemplate transactionTemplate, TransactionStatus status)
     {
+        log.warn("收到服务器指令{},执行操作...",latestMessage);
+        if(StatusEnum.TRUE.getMsg().equals(latestMessage))
+            transactionTemplate.getTransactionManager().commit(status);
+        else
+            transactionTemplate.getTransactionManager().rollback(status);
+    }
+
+    @Async
+    public void connectToServer(String executeStatus, String xid, TransactionTemplate transactionTemplate, TransactionStatus status)
+    {
+        System.err.println(Thread.currentThread().getName());
         try
         {
-            URI uri = new URI(ReqPathEnum.WEB_SOCKET_COMMIT.getUrl()+ GTContext.getXid());
+            URI uri = new URI(ReqPathEnum.WEB_SOCKET_COMMIT.getUrl()+ xid);
             WebSocketContainer container = ContainerProvider.getWebSocketContainer();
             container.connectToServer(this, uri);
             container.setDefaultMaxSessionIdleTimeout(5000L);
             send(executeStatus);
-            Thread.sleep(50);
+            judgeMessage(transactionTemplate,status);
+            Thread.sleep(100);
         } catch (URISyntaxException | DeploymentException | IOException | InterruptedException e)
         {
             log.error("连接GT服务器出现异常", e);

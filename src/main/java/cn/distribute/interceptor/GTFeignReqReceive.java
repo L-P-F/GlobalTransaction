@@ -27,5 +27,6 @@ public class GTFeignReqReceive implements HandlerInterceptor
     public void afterCompletion(HttpServletRequest req, HttpServletResponse rep, Object o, Exception e)
     {
         //最后编写本地线程变量的remove，防止内存泄漏
+        GTContext.remove();
     }
 }

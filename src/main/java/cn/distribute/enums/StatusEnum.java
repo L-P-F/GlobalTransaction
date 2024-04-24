@@ -11,7 +11,9 @@ public enum StatusEnum
     UNKNOWN(-1,"未知"),
     START(0,"开始"),
     COMMIT(1,"提交"),
-    ROLLBACK(2,"回滚");
+    ROLLBACK(2,"回滚"),
+    TRUE(1,"true"),
+    FALSE(0,"false");
 
     private final int code;
     private final String msg;

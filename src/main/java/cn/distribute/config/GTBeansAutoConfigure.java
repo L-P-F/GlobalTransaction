@@ -4,18 +4,23 @@ import cn.distribute.aspect.GTAspect;
 import cn.distribute.interceptor.GTFeignReqReceive;
 import cn.distribute.interceptor.GTFeignReqSend;
 import cn.distribute.interceptor.SQLInterceptor;
+import cn.distribute.properties.DatasourceProperties;
 import cn.distribute.rpc.SocketClient;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.jdbc.datasource.DataSourceTransactionManager;
+import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.transaction.support.TransactionTemplate;
 
 /*2024-04-18 13:28
  * Author: Aurora
  */
 @Configuration
+@EnableAsync
+@EnableConfigurationProperties(DatasourceProperties.class)
 public class GTBeansAutoConfigure
 {
     @Bean
@@ -58,8 +63,8 @@ public class GTBeansAutoConfigure
     }
 
     @Bean
-    @ConditionalOnBean(PlatformTransactionManager.class)
-    public TransactionTemplate transactionTemplate(PlatformTransactionManager transactionManager)
+    @ConditionalOnBean(DataSourceTransactionManager.class)
+    public TransactionTemplate transactionTemplate(DataSourceTransactionManager transactionManager)
     {
         return new TransactionTemplate(transactionManager);
     }
