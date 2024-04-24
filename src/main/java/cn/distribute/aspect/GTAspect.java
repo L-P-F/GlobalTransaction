@@ -39,7 +39,6 @@ public class GTAspect
     @Around("GTCut()") //本身也是一个分支事务
     public Object GTStart(ProceedingJoinPoint point) throws Throwable
     {
-        System.err.println(Thread.currentThread().getName());
         TransactionStatus status = transactionTemplate.getTransactionManager().getTransaction(transactionTemplate);
 
         String xid = UUID.randomUUID().toString();
@@ -99,6 +98,5 @@ public class GTAspect
     protected void commitOrRollback(StatusEnum statusEnum,TransactionStatus status)
     {
         socketClient.connectToServer(statusEnum.getMsg(),GTContext.getXid(),transactionTemplate,status);
-        String message = socketClient.getLatestMessage();
     }
 }

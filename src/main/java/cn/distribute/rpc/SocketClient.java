@@ -76,7 +76,6 @@ public class SocketClient
     @Async
     public void connectToServer(String executeStatus, String xid, TransactionTemplate transactionTemplate, TransactionStatus status)
     {
-        System.err.println(Thread.currentThread().getName());
         try
         {
             URI uri = new URI(ReqPathEnum.WEB_SOCKET_COMMIT.getUrl()+ xid);
@@ -84,8 +83,8 @@ public class SocketClient
             container.connectToServer(this, uri);
             container.setDefaultMaxSessionIdleTimeout(5000L);
             send(executeStatus);
-            judgeMessage(transactionTemplate,status);
             Thread.sleep(100);
+            judgeMessage(transactionTemplate,status);
         } catch (URISyntaxException | DeploymentException | IOException | InterruptedException e)
         {
             log.error("连接GT服务器出现异常", e);
