@@ -6,12 +6,15 @@ import cn.distribute.rpc.HTTPUtil;
 import feign.RequestInterceptor;
 import feign.RequestTemplate;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
 /*2024-04-18 12:15
  * Author: Aurora
  * 拦截feign向外发送的http请求并进行封装数据
  */
 public class GTFeignReqSend implements RequestInterceptor
 {
+    private final AtomicBoolean first = new AtomicBoolean(true);
     @Override
     public void apply(RequestTemplate template)
     {
@@ -19,7 +22,8 @@ public class GTFeignReqSend implements RequestInterceptor
         if(xid != null)
         {
             template.header(ParamsEnum.XID.getValue(), xid);
-            HTTPUtil.saveBranch(xid);//每拦截到一次向外发送的feign请求，就向服务器申请刷新一次xid全局事务的分支事务状态
+            if(first.compareAndSet(true, false))
+                HTTPUtil.saveBranch(xid);//每拦截到一次向外发送的feign请求，就向服务器申请刷新一次xid全局事务的分支事务状态
         }
     }
 }
