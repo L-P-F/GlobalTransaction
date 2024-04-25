@@ -15,6 +15,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.time.LocalDateTime;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicBoolean;
 /*2024-04-22 20:09
  * Author: Aurora
  */
@@ -28,6 +29,8 @@ public class SocketClient
 
     private String latestMessage;
 
+    private final AtomicBoolean flag = new AtomicBoolean(false);
+
     @OnOpen
     public void onOpen(Session session)
     {
@@ -40,6 +43,7 @@ public class SocketClient
     {
         log.warn("时间: {},服务器发送指示{}", LocalDateTime.now(), message);
         latestMessage = message;
+        flag.set(true);
         close();
     }
 
@@ -94,14 +98,16 @@ public class SocketClient
             URI uri = new URI(ReqPathEnum.WEB_SOCKET_COMMIT.getUrl() + xid);
             WebSocketContainer container = ContainerProvider.getWebSocketContainer();
             container.connectToServer(this, uri);
-            container.setDefaultMaxSessionIdleTimeout(5000L);
+            container.setDefaultMaxSessionIdleTimeout(6000L);
             session.getBasicRemote().sendText(executeStatus);
-            Thread.sleep(100);
+            while (true)
+                if(flag.compareAndSet(true,false))
+                    break;
             if (transactionResource == null)
                 GTJudgeMessage(transactionTemplate, status);
             else
                 BTJudgeMessage(transactionTemplate, status, transactionResource);
-        } catch (URISyntaxException | DeploymentException | IOException | InterruptedException e)
+        } catch (URISyntaxException | DeploymentException | IOException  e)
         {
             log.error("连接GT服务器出现异常", e);
         }

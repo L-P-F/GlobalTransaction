@@ -19,6 +19,7 @@ import org.springframework.transaction.support.TransactionTemplate;
 
 import java.util.Objects;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /*2024-04-17 14:35
  * Author: Aurora
@@ -44,10 +45,14 @@ public class GTAspect
         DefaultTransactionDefinition definition = new DefaultTransactionDefinition();
         //开启事务
         TransactionStatus status = Objects.requireNonNull(transactionTemplate.getTransactionManager()).getTransaction(definition);
+        //设置当前全局事务是否需要向服务器注册的请求
+        GTContext.setWhetherFirstSend(new AtomicBoolean(true));
 
         String xid = UUID.randomUUID().toString();
         log.info("开始全局事务,{}", xid);
         GTContext.GTInit(xid, status);
+        if(GTContext.getWhetherFirstSend().compareAndSet(true, false))
+            HTTPUtil.saveBranch(xid);//判断是否已经注册过，注册过就不在发送注册请求
 
         Object result = point.proceed();
 
@@ -58,13 +63,11 @@ public class GTAspect
     }
 
     @Around("BTCut()")
-    public Object BTExecute(ProceedingJoinPoint point) throws Throwable
+    public Object BTStart(ProceedingJoinPoint point) throws Throwable
     {
         DefaultTransactionDefinition definition = new DefaultTransactionDefinition();
         //开启事务
         TransactionStatus status = Objects.requireNonNull(transactionTemplate.getTransactionManager()).getTransaction(definition);
-        //提前存储事务所需的绑定资源
-        GTContext.setTransactionResource(TransactionResource.copyTransactionResource());
 
         String xid = GTContext.getXid();
         if (xid != null)
@@ -72,16 +75,14 @@ public class GTAspect
             MethodSignature ms = (MethodSignature) point.getSignature();
             log.info("分支事务开启：{}，隶属于全局事务：{}", ms.getMethod().getName(), xid);
             GTContext.BTInit(xid, status);
+            HTTPUtil.saveBranch(xid);
         }
 
         Object result = point.proceed();
 
         if (xid != null)
-        {
-            HTTPUtil.saveBranch(xid);
             //异步对接服务器,等待服务器通知commit OR rollback
-            BTCommitOrRollback(StatusEnum.TRUE, status, GTContext.getTransactionResource());
-        }
+            BTCommitOrRollback(StatusEnum.TRUE, status, TransactionResource.copyTransactionResource());
 
         return result;
     }
@@ -97,7 +98,7 @@ public class GTAspect
     public void BTException(Throwable e)
     {
         log.error("分支事务异常：{}，隶属于全局事务：{}", e.getMessage(), GTContext.getXid());
-        BTCommitOrRollback(StatusEnum.FALSE, GTContext.getBT().getTransactionStatus(), GTContext.getTransactionResource());
+        BTCommitOrRollback(StatusEnum.FALSE, GTContext.getBT().getTransactionStatus(), TransactionResource.copyTransactionResource());
     }
 
 

@@ -1,9 +1,10 @@
 package cn.distribute.context;
 
 import cn.distribute.entity.BT;
-import cn.distribute.entity.TransactionResource;
 import cn.distribute.enums.StatusEnum;
 import org.springframework.transaction.TransactionStatus;
+
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /*2024-04-18 10:59
  * Author: Aurora
@@ -12,7 +13,7 @@ public class GTContext
 {
     private static final ThreadLocal<BT> CURRENT_BT = new ThreadLocal<>();
     private static final ThreadLocal<String> XID_THREAD_LOCAL = new ThreadLocal<>();
-    private static final ThreadLocal<TransactionResource> TRANSACTION_RESOURCE_THREAD_LOCAL = new ThreadLocal<>();
+    private static final ThreadLocal<AtomicBoolean> WHETHER_FIRST_SEND_THREAD_LOCAL = new ThreadLocal<>();
 
     public static void setXid(String xid)
     {
@@ -34,21 +35,21 @@ public class GTContext
         return CURRENT_BT.get();
     }
 
-    public static void setTransactionResource(TransactionResource transactionResource)
+    public static void setWhetherFirstSend(AtomicBoolean firstSend)
     {
-        TRANSACTION_RESOURCE_THREAD_LOCAL.set(transactionResource);
+        WHETHER_FIRST_SEND_THREAD_LOCAL.set(firstSend);
     }
 
-    public static TransactionResource getTransactionResource()
+    public static AtomicBoolean getWhetherFirstSend()
     {
-        return TRANSACTION_RESOURCE_THREAD_LOCAL.get();
+        return WHETHER_FIRST_SEND_THREAD_LOCAL.get();
     }
 
     public static void remove()
     {
         CURRENT_BT.remove();
         XID_THREAD_LOCAL.remove();
-        TRANSACTION_RESOURCE_THREAD_LOCAL.remove();
+        WHETHER_FIRST_SEND_THREAD_LOCAL.remove();
     }
 
     public static void GTInit(String xid, TransactionStatus status)
