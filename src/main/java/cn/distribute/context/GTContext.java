@@ -64,7 +64,6 @@ public class GTContext
                 .xid(xid)
                 .status(StatusEnum.START.getCode())
                 .transactionStatus(status)
-                //.sqlData(new LinkedHashSet<>())
                 .build();
         setBT(bt); //当前线程本地BT改为当前BT
     }

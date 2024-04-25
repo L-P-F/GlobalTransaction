@@ -5,7 +5,6 @@ import cn.distribute.enums.ReqPathEnum;
 import cn.distribute.enums.StatusEnum;
 import jakarta.websocket.*;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.annotation.Scope;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -21,7 +20,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 
 @Slf4j
-@Scope("prototype")//每次创建新的socketClient防止并发出现数据安全问题
 @ClientEndpoint
 public class SocketClient
 {
@@ -97,9 +95,12 @@ public class SocketClient
         {
             URI uri = new URI(ReqPathEnum.WEB_SOCKET_COMMIT.getUrl() + xid);
             WebSocketContainer container = ContainerProvider.getWebSocketContainer();
+
             container.connectToServer(this, uri);
             container.setDefaultMaxSessionIdleTimeout(6000L);
+
             session.getBasicRemote().sendText(executeStatus);
+
             while (true)
                 if(flag.compareAndSet(true,false))
                     break;
@@ -113,7 +114,7 @@ public class SocketClient
         }
     }
 
-    @Async
+    @Async(value = "asyncTaskExecutor")
     public void BTTryToConnect(String executeStatus, String xid, TransactionTemplate transactionTemplate, TransactionStatus status, TransactionResource transactionResource)
     {
         connectToServer(executeStatus, xid, transactionTemplate, status, transactionResource);

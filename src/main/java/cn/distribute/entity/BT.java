@@ -17,8 +17,8 @@ import org.springframework.transaction.TransactionStatus;
 @AllArgsConstructor
 public class BT
 {
-    private String bid; //分支事务id
     private String xid; //全局事务id
+    private String bid; //分支事务id
     private int status; //分支事务状态
     private int executeOrder; //分支事务执行顺序
 

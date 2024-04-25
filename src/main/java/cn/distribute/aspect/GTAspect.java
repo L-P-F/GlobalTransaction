@@ -1,5 +1,6 @@
 package cn.distribute.aspect;
 
+import cn.distribute.config.GTSocketClientAutoConfigure;
 import cn.distribute.context.GTContext;
 import cn.distribute.entity.TransactionResource;
 import cn.distribute.enums.StatusEnum;
@@ -13,6 +14,7 @@ import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -28,8 +30,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 @Slf4j
 public class GTAspect
 {
-    @Autowired
-    private SocketClient socketClient;
     @Autowired
     private TransactionTemplate transactionTemplate;
 
@@ -104,11 +104,13 @@ public class GTAspect
 
     private void GTCommitOrRollback(StatusEnum statusEnum, TransactionStatus status)
     {
-        socketClient.GTTryToConnect(statusEnum.getMsg(), GTContext.getXid(), transactionTemplate, status);
+        AnnotationConfigApplicationContext ac = new AnnotationConfigApplicationContext(GTSocketClientAutoConfigure.class);
+        ac.getBean(SocketClient.class).GTTryToConnect(statusEnum.getMsg(), GTContext.getXid(), transactionTemplate, status);
     }
 
     private void BTCommitOrRollback(StatusEnum statusEnum, TransactionStatus status, TransactionResource transactionResource)
     {
-        socketClient.BTTryToConnect(statusEnum.getMsg(), GTContext.getXid(), transactionTemplate, status, transactionResource);
+        AnnotationConfigApplicationContext ac = new AnnotationConfigApplicationContext(GTSocketClientAutoConfigure.class);
+        ac.getBean(SocketClient.class).BTTryToConnect(statusEnum.getMsg(), GTContext.getXid(), transactionTemplate, status, transactionResource);
     }
 }

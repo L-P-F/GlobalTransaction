@@ -24,7 +24,7 @@ public class HTTPUtil
     public static void saveBranch(String xid)
     {
         String jsonBody = JSON.toJSONString(GTContext.getBT());
-        log.info("保存分支事务请求体: {}", jsonBody);
+        log.info("注册分支事务请求体: {}", jsonBody);
         try (CloseableHttpClient httpClient = HttpClients.createDefault())
         {
             HttpPost httpPost = new HttpPost(ReqPathEnum.HTTP_SAVE.getUrl() + xid);
@@ -36,13 +36,13 @@ public class HTTPUtil
                 if (responseEntity != null)
                 {
                     String responseBody = EntityUtils.toString(responseEntity);
-                    log.info("保存分支事务响应体: {}", responseBody);
+                    log.info("注册分支事务响应体: {}", responseBody);
                 } else
-                    log.error("保存没有响应.");
+                    log.error("注册分支事务没有响应.");
             }
         } catch (IOException e)
         {
-            log.error("保存Error getting data: {}", e.getMessage());
+            log.error("注册出错Error getting data: {}", e.getMessage());
         }
     }
 }
