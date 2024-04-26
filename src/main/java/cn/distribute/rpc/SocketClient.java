@@ -15,8 +15,10 @@ import java.net.URISyntaxException;
 import java.time.LocalDateTime;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
-/*2024-04-22 20:09
- * Author: Aurora
+
+/**
+ * 2024-04-22 20:09
+ * <p>Author: Aurora-LPF</p>
  */
 
 @Slf4j
@@ -54,7 +56,10 @@ public class SocketClient
     }
 
     @OnClose
-    public void onClose() {log.debug("关闭连接,当前分支事务结束");}
+    public void onClose()
+    {
+        log.debug("关闭连接,当前分支事务结束");
+    }
 
     private void judgeMessage(BT bt, TransactionTemplate transactionTemplate, TransactionResource transactionResource)
     {

@@ -16,8 +16,9 @@ import org.apache.http.util.EntityUtils;
 
 import java.io.IOException;
 
-/*2024-04-20 11:14
- * Author: Aurora
+/**
+ * 2024-04-20 11:14
+ * <p>Author: Aurora-LPF</p>
  */
 @Slf4j
 public class HTTPUtil
@@ -37,7 +38,7 @@ public class HTTPUtil
                 if (responseEntity != null)
                 {
                     String responseBody = EntityUtils.toString(responseEntity);
-                    GTContext.getBT().setExecuteOrder((Integer)JSON.parseObject(responseBody, Result.class).getContent());
+                    GTContext.getBT().setExecuteOrder((Integer) JSON.parseObject(responseBody, Result.class).getContent());
                     log.debug("服务器响应: {}", responseBody);
                 } else
                     log.error("注册分支事务,服务器未响应.本次事务已【回滚】");

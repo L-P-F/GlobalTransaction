@@ -7,9 +7,10 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 import javax.sql.DataSource;
 import java.util.*;
 
-/*2024-04-24 13:31
- * Author: Aurora
- * 保存当前事务资源,用于线程间的事务资源COPY操作
+/**
+ * 2024-04-24 13:31
+ * <p>Author: Aurora-LPF</p>
+ * <p>保存当前事务资源,用于线程间的事务资源COPY操作</p>
  */
 @Builder
 public class TransactionResource

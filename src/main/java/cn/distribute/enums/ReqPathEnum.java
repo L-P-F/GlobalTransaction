@@ -2,8 +2,9 @@ package cn.distribute.enums;
 
 import lombok.Getter;
 
-/*2024-04-19 21:35
- * Author: Aurora
+/**
+ * 2024-04-19 21:35
+ * <p>Author: Aurora-LPF</p>
  */
 @Getter
 public enum ReqPathEnum

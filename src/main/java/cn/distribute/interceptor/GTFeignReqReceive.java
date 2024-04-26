@@ -6,10 +6,10 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.web.servlet.HandlerInterceptor;
 
-/*
-2024-04-18 12:15
- * Author: Aurora
-拦截发送进来的feign请求,拦截器需要用户在自己的项目中注册,拦截所有路径即可
+/**
+ * 2024-04-18 12:15
+ * <p>Author: Aurora-LPF</p>
+ * <p>拦截发送进来的feign请求,拦截器需要用户在自己的项目中注册,拦截所有路径即可</p>
  */
 public class GTFeignReqReceive implements HandlerInterceptor
 {

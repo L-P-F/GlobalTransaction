@@ -7,8 +7,9 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.transaction.TransactionStatus;
 
-/*2024-04-18 16:57
- * Author: Aurora
+/**
+ * 2024-04-18 16:57
+ * <p>Author: Aurora-LPF</p>
  * 分支事务
  */
 @Data

@@ -9,8 +9,10 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
-/*2024-04-18 13:28
- * Author: Aurora
+/**
+ * 2024-04-18 13:28
+ * <p>Author: Aurora-LPF</p>
+ * <p>自动配置类</p>
  */
 @Configuration
 public class GTBeansAutoConfigure

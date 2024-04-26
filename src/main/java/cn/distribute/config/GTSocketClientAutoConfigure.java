@@ -9,8 +9,10 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 import java.util.concurrent.Executor;
 
-/*2024-04-25 18:42
- * Author: Aurora
+/**
+ * 2024-04-25 18:42
+ * <p>Author: Aurora-LPF</p>
+ * <p>自动配置类</p>
  */
 @Configuration
 @EnableAsync

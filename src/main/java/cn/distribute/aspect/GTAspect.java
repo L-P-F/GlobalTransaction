@@ -23,8 +23,10 @@ import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-/*2024-04-17 14:35
- * Author: Aurora
+/**
+ * 2024-04-17 14:35
+ * <p>Author: Aurora-LPF</p>
+ * <P>core:切面拦截所有标记了GT,BT注解的方法,手动开启事务</P>
  */
 @Aspect
 @Slf4j

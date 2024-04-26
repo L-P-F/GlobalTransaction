@@ -6,8 +6,9 @@ import org.springframework.transaction.TransactionStatus;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
-/*2024-04-18 10:59
- * Author: Aurora
+/**
+ * 2024-04-18 10:59
+ * <p>Author: Aurora-LPF</p>
  */
 public class GTContext
 {
