@@ -53,19 +53,34 @@ public class GTContext
         WHETHER_FIRST_SEND_THREAD_LOCAL.remove();
     }
 
+    /**
+     * 全局事务初始化
+     */
     public static void GTInit(String xid, TransactionStatus status)
     {
         setXid(xid);
         BTInit(xid, status);
     }
 
+    /**
+     * 分支事务初始化
+     */
     public static void BTInit(String xid, TransactionStatus status)
     {
-        BT bt = BT.builder()
+        setBT(BT.builder()
                 .xid(xid)
                 .status(StatusEnum.START.getCode())
                 .transactionStatus(status)
-                .build();
-        setBT(bt); //当前线程本地BT改为当前BT
+                .build());//绑定BT到当前线程
+    }
+
+    /**
+     * 普通本地事务初始化
+     */
+    public static void CTInit(TransactionStatus status)
+    {
+        setBT(BT.builder()
+                .transactionStatus(status)
+                .build());
     }
 }

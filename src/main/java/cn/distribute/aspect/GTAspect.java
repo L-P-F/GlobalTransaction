@@ -72,24 +72,26 @@ public class GTAspect
     @Around("BTCut()")
     public Object BTStart(ProceedingJoinPoint point) throws Throwable
     {
+        DefaultTransactionDefinition definition = new DefaultTransactionDefinition();
+        //开启事务
+        TransactionStatus status = Objects.requireNonNull(transactionTemplate.getTransactionManager()).getTransaction(definition);
+
         String xid = GTContext.getXid();
         if (xid != null)
         {
-            DefaultTransactionDefinition definition = new DefaultTransactionDefinition();
-            //开启事务
-            TransactionStatus status = Objects.requireNonNull(transactionTemplate.getTransactionManager()).getTransaction(definition);
-
             MethodSignature ms = (MethodSignature) point.getSignature();
             GTContext.BTInit(xid, status);
             HTTPUtil.saveBranch(xid);
             log.info("分支事务开启,方法名: {}，隶属于全局事务: {},执行顺序: {}", ms.getMethod().getName(), xid, GTContext.getBT().getExecuteOrder());
-        }
+        }else
+            GTContext.CTInit(status);
 
         Object result = point.proceed();
 
         if (xid != null)
             //异步对接服务器,等待服务器通知commit OR rollback
             BTCommitOrRollback(StatusEnum.TRUE);
+        else transactionTemplate.getTransactionManager().commit(status);
 
         return result;
     }
@@ -106,9 +108,14 @@ public class GTAspect
     @AfterThrowing(pointcut = "BTCut()", throwing = "e")
     public void BTException(Throwable e)
     {
-        log.error("事务异常: {},隶属于全局事务: {},在全局事务中处于第{}位", e.getMessage(), GTContext.getXid(), GTContext.getBT().getExecuteOrder());
-        log.error("开始向服务器推送【回滚】请求");
-        BTCommitOrRollback(StatusEnum.FALSE);
+        if(GTContext.getXid() != null)
+        {
+            log.error("事务异常: {},隶属于全局事务: {},在全局事务中处于第{}位", e.getMessage(), GTContext.getXid(), GTContext.getBT().getExecuteOrder());
+            log.error("开始向服务器推送【回滚】请求");
+            BTCommitOrRollback(StatusEnum.FALSE);
+        }
+        else
+            Objects.requireNonNull(transactionTemplate.getTransactionManager()).rollback(GTContext.getBT().getTransactionStatus());
     }
 
 
