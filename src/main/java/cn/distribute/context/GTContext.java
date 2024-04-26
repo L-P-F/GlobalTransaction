@@ -26,7 +26,7 @@ public class GTContext
         return XID_THREAD_LOCAL.get();
     }
 
-    public static void setBT(BT bt)
+    private static void setBT(BT bt)
     {
         CURRENT_BT.set(bt);
     }
