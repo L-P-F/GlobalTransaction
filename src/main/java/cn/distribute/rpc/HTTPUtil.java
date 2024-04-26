@@ -1,6 +1,7 @@
 package cn.distribute.rpc;
 
 import cn.distribute.context.GTContext;
+import cn.distribute.entity.Result;
 import cn.distribute.enums.ReqPathEnum;
 import com.alibaba.fastjson.JSON;
 import lombok.extern.slf4j.Slf4j;
@@ -24,7 +25,7 @@ public class HTTPUtil
     public static void saveBranch(String xid)
     {
         String jsonBody = JSON.toJSONString(GTContext.getBT());
-        log.info("注册分支事务请求体: {}", jsonBody);
+        log.debug("注册分支事务请求体: {}", jsonBody);
         try (CloseableHttpClient httpClient = HttpClients.createDefault())
         {
             HttpPost httpPost = new HttpPost(ReqPathEnum.HTTP_SAVE.getUrl() + xid);
@@ -36,13 +37,14 @@ public class HTTPUtil
                 if (responseEntity != null)
                 {
                     String responseBody = EntityUtils.toString(responseEntity);
-                    log.info("注册分支事务响应体: {}", responseBody);
+                    GTContext.getBT().setExecuteOrder((Integer)JSON.parseObject(responseBody, Result.class).getContent());
+                    log.debug("服务器响应: {}", responseBody);
                 } else
-                    log.error("注册分支事务没有响应.");
+                    log.error("注册分支事务,服务器未响应.本次事务已【回滚】");
             }
         } catch (IOException e)
         {
-            log.error("注册出错Error getting data: {}", e.getMessage());
+            log.error("注册出错: {},本次事务已【回滚】,请检查是否成功启动【GT-server】", e.getMessage());
         }
     }
 }

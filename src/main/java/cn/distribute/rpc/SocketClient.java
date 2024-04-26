@@ -1,12 +1,12 @@
 package cn.distribute.rpc;
 
+import cn.distribute.entity.BT;
 import cn.distribute.entity.TransactionResource;
 import cn.distribute.enums.ReqPathEnum;
 import cn.distribute.enums.StatusEnum;
 import jakarta.websocket.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Async;
-import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import java.io.IOException;
@@ -32,96 +32,83 @@ public class SocketClient
     @OnOpen
     public void onOpen(Session session)
     {
-        log.warn("事务对接服务器成功,会话对象为{}", session);
         this.session = session;
     }
 
     @OnMessage
     public void onMessage(String message)
     {
-        log.warn("时间: {},服务器发送指示{}", LocalDateTime.now(), message);
+        log.debug("服务器发送指示: " + (StatusEnum.TRUE.getMsg().equals(message) ? "提交" : "回滚") + ", 时间: {}", LocalDateTime.now());
         latestMessage = message;
         flag.set(true);
-        close();
-    }
-
-    @OnClose
-    public void onClose()
-    {
-        log.warn("关闭连接,当前分支事务结束");
-    }
-
-    /**
-     * 关闭websocket连接
-     */
-    private void close()
-    {
         if (session != null && session.isOpen())
+        {
             try
             {
                 session.close();
             } catch (IOException e)
             {
-                log.error("与GT服务器断开连接时出现异常: {}", e.getMessage());
+                log.error("与GT服务器断开连接时出现异常: {},请通知开发人员", e.getMessage());
             }
+        }
     }
 
-    private void BTJudgeMessage(TransactionTemplate transactionTemplate, TransactionStatus status,
-                               TransactionResource transactionResource)
+    @OnClose
+    public void onClose() {log.debug("关闭连接,当前分支事务结束");}
+
+    private void judgeMessage(BT bt, TransactionTemplate transactionTemplate, TransactionResource transactionResource)
     {
-        log.warn("收到服务器指令{},执行操作...", latestMessage);
-        transactionResource.autoWiredTransactionResource();
-        if (StatusEnum.TRUE.getMsg().equals(latestMessage))
-            Objects.requireNonNull(transactionTemplate.getTransactionManager()).commit(status);
+        boolean commitOrRollback = StatusEnum.TRUE.getMsg().equals(latestMessage);
+        log.warn("{} 号分支事务收到服务器指令: " + (commitOrRollback ? "【提交】" : "【回滚】"), bt.getExecuteOrder());
+        if (transactionResource != null)
+            transactionResource.autoWiredTransactionResource();
+
+        if (commitOrRollback)
+            Objects.requireNonNull(transactionTemplate.getTransactionManager()).commit(bt.getTransactionStatus());
         else
-            Objects.requireNonNull(transactionTemplate.getTransactionManager()).rollback(status);
-        transactionResource.removeTransactionResource();
+            Objects.requireNonNull(transactionTemplate.getTransactionManager()).rollback(bt.getTransactionStatus());
+
+        if (transactionResource != null)
+        {
+            transactionResource.removeTransactionResource();
+            log.warn("{} 号分支事务" + (commitOrRollback ? "【提交】" : "【回滚】") + "成功", bt.getExecuteOrder());
+        } else
+            log.warn("全局事务" + (commitOrRollback ? "【提交】" : "【回滚】") + "成功,与服务器断开连接");
     }
 
-    private void GTJudgeMessage(TransactionTemplate transactionTemplate, TransactionStatus status)
-    {
-        log.warn("收到服务器指令{},执行操作...", latestMessage);
-        if (StatusEnum.TRUE.getMsg().equals(latestMessage))
-            Objects.requireNonNull(transactionTemplate.getTransactionManager()).commit(status);
-        else
-            Objects.requireNonNull(transactionTemplate.getTransactionManager()).rollback(status);
-    }
-
-
-    private void connectToServer(String executeStatus, String xid, TransactionTemplate transactionTemplate,
-                                TransactionStatus status, TransactionResource transactionResource)
+    private void connectToServer(BT bt, String executeStatus, TransactionTemplate transactionTemplate, TransactionResource transactionResource)
     {
         try
         {
-            URI uri = new URI(ReqPathEnum.WEB_SOCKET_COMMIT.getUrl() + xid);
+            URI uri = new URI(ReqPathEnum.WEB_SOCKET_CONNECT.getUrl() + bt.getXid() + ("/") + (bt.getExecuteOrder()));
             WebSocketContainer container = ContainerProvider.getWebSocketContainer();
 
             container.connectToServer(this, uri);
             container.setDefaultMaxSessionIdleTimeout(6000L);
 
+            log.warn("{} 号分支事务成功对接服务器,发送执行状态: {}", bt.getExecuteOrder(), executeStatus);
             session.getBasicRemote().sendText(executeStatus);
 
             while (true)
-                if(flag.compareAndSet(true,false))
+                if (flag.compareAndSet(true, false))
                     break;
-            if (transactionResource == null)
-                GTJudgeMessage(transactionTemplate, status);
-            else
-                BTJudgeMessage(transactionTemplate, status, transactionResource);
-        } catch (URISyntaxException | DeploymentException | IOException  e)
+            judgeMessage(bt, transactionTemplate, transactionResource);
+        } catch (URISyntaxException | DeploymentException | IOException e)
         {
-            log.error("连接GT服务器出现异常", e);
+            log.error("连接GT服务器出现异常: {},已控制所有事务【回滚】,请检查是否已经成功启动【GT-server】", e.getMessage());
+            latestMessage = StatusEnum.FALSE.getMsg();
+            judgeMessage(bt, transactionTemplate, transactionResource);
         }
     }
 
     @Async(value = "asyncTaskExecutor")
-    public void BTTryToConnect(String executeStatus, String xid, TransactionTemplate transactionTemplate, TransactionStatus status, TransactionResource transactionResource)
+    public void BTTryToConnect(BT bt, String executeStatus, TransactionTemplate transactionTemplate, TransactionResource transactionResource)
     {
-        connectToServer(executeStatus, xid, transactionTemplate, status, transactionResource);
+        connectToServer(bt, executeStatus, transactionTemplate, transactionResource);
     }
 
-    public void GTTryToConnect(String executeStatus, String xid, TransactionTemplate transactionTemplate, TransactionStatus status)
+    public void GTTryToConnect(BT bt, String executeStatus, TransactionTemplate transactionTemplate)
     {
-        connectToServer(executeStatus, xid, transactionTemplate, status, null);
+        connectToServer(bt, executeStatus, transactionTemplate, null);
     }
 }

@@ -6,8 +6,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.web.servlet.HandlerInterceptor;
 
-import java.io.IOException;
-
 /*
 2024-04-18 12:15
  * Author: Aurora
@@ -16,7 +14,7 @@ import java.io.IOException;
 public class GTFeignReqReceive implements HandlerInterceptor
 {
     @Override
-    public boolean preHandle(HttpServletRequest req, HttpServletResponse res, Object o) throws IOException
+    public boolean preHandle(HttpServletRequest req, HttpServletResponse res, Object o)
     {
         String xid = req.getHeader(ParamsEnum.XID.getValue());
         GTContext.setXid(xid);
@@ -27,6 +25,6 @@ public class GTFeignReqReceive implements HandlerInterceptor
     public void afterCompletion(HttpServletRequest req, HttpServletResponse rep, Object o, Exception e)
     {
         //最后编写本地线程变量的remove，防止内存泄漏
-        GTContext.remove();
+        GTContext.clear();
     }
 }

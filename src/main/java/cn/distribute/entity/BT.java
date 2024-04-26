@@ -18,9 +18,14 @@ import org.springframework.transaction.TransactionStatus;
 public class BT
 {
     private String xid; //全局事务id
+
+    @JSONField(serialize = false)
     private String bid; //分支事务id
-    private int status; //分支事务状态
-    private int executeOrder; //分支事务执行顺序
+
+    private Integer status; //分支事务状态
+
+    @JSONField(serialize = false)
+    private Integer executeOrder; //分支事务执行顺序
 
     @JSONField(serialize = false) //客户端控制事务回滚或提交时使用的字段，不需要序列化
     private TransactionStatus transactionStatus; //事务状态

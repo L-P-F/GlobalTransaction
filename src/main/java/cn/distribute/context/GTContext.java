@@ -45,7 +45,7 @@ public class GTContext
         return WHETHER_FIRST_SEND_THREAD_LOCAL.get();
     }
 
-    public static void remove()
+    public static void clear()
     {
         CURRENT_BT.remove();
         XID_THREAD_LOCAL.remove();
