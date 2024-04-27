@@ -8,7 +8,7 @@
 
 ## 1.将项目clone本地使用install安装项目到maven 仓库 或者 直接下载提供好的压缩包将依赖解压到maven仓库，并在项目中引入依赖
 
-[压缩包下载]()
+[压缩包下载](https://github.com/L-P-F/GlobalTransaction/releases/tag/dependency)
 ```xml
 <dependency>
     <groupId>cn.distributed</groupId>
