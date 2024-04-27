@@ -6,8 +6,9 @@
 
 **本项目作为依赖使用,将项目安装到本地仓库中，并引入依赖**
 
-## 1.安装项目到maven 仓库，并引入依赖
+## 1.将项目clone本地使用install安装项目到maven 仓库 或者 直接下载提供好的压缩包将依赖解压到maven仓库，并在项目中引入依赖
 
+[压缩包下载]()
 ```xml
 <dependency>
     <groupId>cn.distributed</groupId>
