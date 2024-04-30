@@ -12,12 +12,13 @@
         <maven.compiler.target>17</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <spring-cloud.version>2022.0.0</spring-cloud.version>
+        <spring-boot.version>3.0.0</spring-boot.version>
+        <mybatis-plus>3.5.3.2</mybatis-plus>
         <aspectj>1.9.4</aspectj>
         <lombok.version>1.18.20</lombok.version>
         <fastjson>1.2.70</fastjson>
         <http-client>4.5.13</http-client>
         <web-socket>3.0.0</web-socket>
-        <spring-boot.version>3.0.0</spring-boot.version>
         <jdbc>6.0.6</jdbc>
     </properties>
     <dependencyManagement>
@@ -84,6 +85,12 @@
             <artifactId>httpclient</artifactId>
             <version>${http-client}</version>
             <optional>true</optional>
+        </dependency>
+
+        <dependency>
+            <groupId>com.baomidou</groupId>
+            <artifactId>mybatis-plus-boot-starter</artifactId>
+            <version>${mybatis-plus}</version>
         </dependency>
 
         <dependency>
