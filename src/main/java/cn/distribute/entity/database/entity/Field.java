@@ -10,7 +10,10 @@ import lombok.Data;
 public class Field
 {
     private String fieldName;
+
     private int type;
+
     private Object value;
+
     private KeyType keyType = KeyType.NUll;
 }

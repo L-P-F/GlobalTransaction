@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
  */
 public class UndoInsertExecutor extends AbstractUndoExecutor
 {
-    private static final String DELETE_SQL = "DELETE FROM %s WHERE %s ";
+    private static final String DELETE_SQL = "DELETE FROM %s WHERE %s";
 
     @Override
     public SQLUndoLog buildSQLUndoLog(String sql, Connection connection, String tableName) throws SQLException
@@ -61,6 +61,36 @@ public class UndoInsertExecutor extends AbstractUndoExecutor
         afterImage.setRows(rows);
         afterImage.setPrimaryKeyValues(afterPrimaryKeyValues);
         sqlUndoLog.setAfterImage(afterImage);
+    }
+
+    @Override
+    protected ResultSet getCurrResultSet(SQLUndoLog sqlUndoLog, Connection connection) throws SQLException
+    {
+        List<Object> primaryKeyValues = sqlUndoLog.getAfterImage().getPrimaryKeyValues();
+        StringBuilder condition = new StringBuilder(sqlUndoLog.getCurrTablePrimaryKey() + " in(");
+        for (int i = 0; i < primaryKeyValues.size(); i++)
+        {
+            if (i != 0)
+                condition.append(",").append(primaryKeyValues.get(i));
+            else
+                condition.append(primaryKeyValues.get(i));
+        }
+        condition.append(")");
+        String checkSql = String.format(CHECK_SQL, sqlUndoLog.getAfterImage().getTableName(), condition);
+        return connection.prepareStatement(checkSql).executeQuery();
+    }
+
+    @Override
+    protected String buildUndoSQL(TableData beforeImage)
+    {
+        List<Field> primaryKeys = beforeImage.getRows().get(0).primaryKeys();
+        StringBuilder condition = new StringBuilder();
+        for (int i = 0; i < primaryKeys.size(); i++)
+        {
+            if (i != 0) condition.append(" and ");
+            condition.append(primaryKeys.get(i).getFieldName()).append(" = ?");
+        }
+        return String.format(DELETE_SQL, beforeImage.getTableName(), condition);
     }
 
     private ResultSet getResultSet(String sql, Connection connection) throws SQLException

@@ -1,6 +1,8 @@
 package cn.distribute.entity.database.undoExecutor;
 
 import cn.distribute.entity.database.SQLUndoLog;
+import cn.distribute.entity.database.entity.Field;
+import cn.distribute.entity.database.entity.Row;
 import cn.distribute.entity.database.entity.TableData;
 import org.apache.ibatis.mapping.SqlCommandType;
 
@@ -10,6 +12,7 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /**
  * 2024-04-29 16:25
@@ -18,7 +21,7 @@ import java.util.regex.Pattern;
 public class UndoUpdateExecutor extends AbstractUndoExecutor
 {
     private static final SqlCommandType UPDATE = SqlCommandType.UPDATE;
-    private static final String UPDATE_SQL = "UPDATE %s SET %s WHERE %s ";
+    private static final String UPDATE_SQL = "UPDATE %s SET %s WHERE %s";
 
     @Override
     public SQLUndoLog buildSQLUndoLog(String sql, Connection connection, String tableName) throws SQLException
@@ -29,12 +32,42 @@ public class UndoUpdateExecutor extends AbstractUndoExecutor
     @Override
     public void bindAfterImage(String sql, SQLUndoLog sqlUndoLog, Connection connection) throws SQLException
     {
-        sqlUndoLog.setAfterImage(TableData.buildTableData(getAfterResultSet(sqlUndoLog, connection),sqlUndoLog.getCurrTablePrimaryKey()));
+        sqlUndoLog.setAfterImage(TableData.buildTableData(getAfterResultSet(sqlUndoLog, connection), sqlUndoLog.getCurrTablePrimaryKey()));
+    }
+
+    @Override
+    protected ResultSet getCurrResultSet(SQLUndoLog sqlUndoLog, Connection connection) throws SQLException
+    {
+        return getResultSet(sqlUndoLog, connection, sqlUndoLog.getAfterImage().getPrimaryKeyValues());
+    }
+
+    @Override
+    protected String buildUndoSQL(TableData beforeImage)
+    {
+        Row row = beforeImage.getRows().get(0);
+        List<Field> nonPrimaryKeysFields = row.nonPrimaryKeys();
+        String sets = nonPrimaryKeysFields.stream()
+                .map(field -> field.getFieldName() + " = ?")
+                .collect(Collectors.joining(", "));
+
+        List<Field> primaryKeys = row.primaryKeys();
+        StringBuilder condition = new StringBuilder();
+        for (int i = 0; i < primaryKeys.size(); i++)
+        {
+            if (i != 0) condition.append(" and ");
+            condition.append(primaryKeys.get(i).getFieldName()).append(" = ?");
+        }
+
+        return String.format(UPDATE_SQL, beforeImage.getTableName(), sets, condition);
     }
 
     private ResultSet getAfterResultSet(SQLUndoLog sqlUndoLog, Connection connection) throws SQLException
     {
-        List<Object> primaryKeyValues = sqlUndoLog.getBeforeImage().getPrimaryKeyValues();
+        return getResultSet(sqlUndoLog, connection, sqlUndoLog.getBeforeImage().getPrimaryKeyValues());
+    }
+
+    private ResultSet getResultSet(SQLUndoLog sqlUndoLog, Connection connection, List<Object> primaryKeyValues) throws SQLException
+    {
         StringBuilder condition = new StringBuilder(sqlUndoLog.getCurrTablePrimaryKey() + " in(");
         for (int i = 0; i < primaryKeyValues.size(); i++)
         {
