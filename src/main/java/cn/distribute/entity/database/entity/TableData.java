@@ -32,7 +32,7 @@ public class TableData
     {
         TableData tableData = new TableData();
         ResultSetMetaData metaData = resultSet.getMetaData();
-        tableData.setTableName(metaData.getTableName(1)); // todo 获取表明，由于一个结果集中可能由于sql的复杂程度导致数据不来自用一个表，这样获取表名不严谨
+        tableData.setTableName(metaData.getTableName(1)); // todo 获取表名，由于一个结果集中可能由于sql的复杂程度导致数据不来自用一个表，这样获取表名不严谨
         int columnCount = metaData.getColumnCount();
 
         while (resultSet.next())
