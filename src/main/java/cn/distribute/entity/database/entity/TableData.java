@@ -1,5 +1,6 @@
 package cn.distribute.entity.database.entity;
 
+import cn.distribute.until.CircumventionKeyWord;
 import lombok.Data;
 
 import javax.sql.rowset.serial.*;
@@ -41,7 +42,8 @@ public class TableData
             for (int i = 1; i <= columnCount; i++)
             {
                 Field field = new Field();
-                String columnName = metaData.getColumnName(i);
+                String columnName = CircumventionKeyWord.Convert(metaData.getColumnName(i));
+
 
                 if (columnName.equals(primaryKey))
                     field.setKeyType(KeyType.PRIMARY_KEY);

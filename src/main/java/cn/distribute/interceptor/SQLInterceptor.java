@@ -1,6 +1,7 @@
 package cn.distribute.interceptor;
 
 import cn.distribute.context.GTContext;
+import cn.distribute.entity.database.SQLUndoLog;
 import cn.distribute.entity.database.UndoExecutorFactory;
 import cn.distribute.entity.database.undoExecutor.AbstractUndoExecutor;
 import lombok.SneakyThrows;
@@ -53,6 +54,12 @@ public class SQLInterceptor implements Interceptor
 
             // 绑定后置镜像
             undoExecutor.bindAfterImage(sql, GTContext.getLastSQLUndoLog(), connection);
+            for (SQLUndoLog sqlUndoLog : GTContext.getSQLUndoLogs())
+            {
+                System.out.println(sqlUndoLog.getBeforeImage());
+                System.out.println(sqlUndoLog.getAfterImage());
+                System.out.println("------------------------------------");
+            }
             return result;
         }
     }
