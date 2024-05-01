@@ -1,7 +1,6 @@
 package cn.distribute.entity.database.entity;
 
 import lombok.Data;
-import org.apache.ibatis.mapping.SqlCommandType;
 
 import javax.sql.rowset.serial.*;
 import java.net.URL;
@@ -28,7 +27,7 @@ public class TableData
     {
     }
 
-    public static TableData buildTableData(ResultSet resultSet, String primaryKey, SqlCommandType sqlCommandType) throws SQLException
+    public static TableData buildTableData(ResultSet resultSet, String primaryKey) throws SQLException
     {
         TableData tableData = new TableData();
         ResultSetMetaData metaData = resultSet.getMetaData();
@@ -60,7 +59,7 @@ public class TableData
                         Blob blob = resultSet.getBlob(i);
                         if (blob != null)
                             field.setValue(new SerialBlob(blob));
-                        if (field.getKeyType() == KeyType.PRIMARY_KEY && blob != null && SqlCommandType.UPDATE.equals(sqlCommandType))
+                        if (field.getKeyType() == KeyType.PRIMARY_KEY && blob != null)
                             tableData.primaryKeyValues.add(new SerialBlob(blob));
                     }
                     case Types.CLOB ->
@@ -68,7 +67,7 @@ public class TableData
                         Clob clob = resultSet.getClob(i);
                         if (clob != null)
                             field.setValue(new SerialClob(clob));
-                        if(field.getKeyType() == KeyType.PRIMARY_KEY && clob != null && SqlCommandType.UPDATE.equals(sqlCommandType))
+                        if(field.getKeyType() == KeyType.PRIMARY_KEY && clob != null)
                             tableData.primaryKeyValues.add(new SerialClob(clob));
                     }
                     case Types.NCLOB ->
@@ -76,7 +75,7 @@ public class TableData
                         NClob nClob = resultSet.getNClob(i);
                         if (nClob != null)
                             field.setValue(new SerialClob(nClob));
-                        if(field.getKeyType() == KeyType.PRIMARY_KEY && nClob != null && SqlCommandType.UPDATE.equals(sqlCommandType))
+                        if(field.getKeyType() == KeyType.PRIMARY_KEY && nClob != null)
                             tableData.primaryKeyValues.add(new SerialClob(nClob));
                     }
                     case Types.ARRAY ->
@@ -84,7 +83,7 @@ public class TableData
                         Array array = resultSet.getArray(i);
                         if (array != null)
                             field.setValue(new SerialArray(array));
-                        if(field.getKeyType() == KeyType.PRIMARY_KEY && array != null && SqlCommandType.UPDATE.equals(sqlCommandType))
+                        if(field.getKeyType() == KeyType.PRIMARY_KEY && array != null)
                             tableData.primaryKeyValues.add(new SerialArray(array));
                     }
                     case Types.REF ->
@@ -92,7 +91,7 @@ public class TableData
                         Ref ref = resultSet.getRef(i);
                         if (ref != null)
                             field.setValue(new SerialRef(ref));
-                        if(field.getKeyType() == KeyType.PRIMARY_KEY && ref != null && SqlCommandType.UPDATE.equals(sqlCommandType))
+                        if(field.getKeyType() == KeyType.PRIMARY_KEY && ref != null)
                             tableData.primaryKeyValues.add(new SerialRef(ref));
                     }
                     case Types.DATALINK ->
@@ -100,7 +99,7 @@ public class TableData
                         URL url = resultSet.getURL(i);
                         if (url != null)
                             field.setValue(new SerialDatalink(url));
-                        if(field.getKeyType() == KeyType.PRIMARY_KEY && url != null && SqlCommandType.UPDATE.equals(sqlCommandType))
+                        if(field.getKeyType() == KeyType.PRIMARY_KEY && url != null)
                             tableData.primaryKeyValues.add(new SerialDatalink(url));
                     }
                     case Types.JAVA_OBJECT ->
@@ -108,14 +107,14 @@ public class TableData
                         Object object = resultSet.getObject(i);
                         if (object != null)
                             field.setValue(new SerialJavaObject(object));
-                        if(field.getKeyType() == KeyType.PRIMARY_KEY && object != null && SqlCommandType.UPDATE.equals(sqlCommandType))
+                        if(field.getKeyType() == KeyType.PRIMARY_KEY && object != null)
                             tableData.primaryKeyValues.add(new SerialJavaObject(object));
                     }
                     default ->
                     {
                         // JDBCType.DISTINCT, JDBCType.STRUCT etc...
                         field.setValue(holdSerialDataType(resultSet.getObject(i)));
-                        if(field.getKeyType() == KeyType.PRIMARY_KEY && SqlCommandType.UPDATE.equals(sqlCommandType))
+                        if(field.getKeyType() == KeyType.PRIMARY_KEY)
                             tableData.primaryKeyValues.add(holdSerialDataType(resultSet.getObject(i)));
                     }
                 }

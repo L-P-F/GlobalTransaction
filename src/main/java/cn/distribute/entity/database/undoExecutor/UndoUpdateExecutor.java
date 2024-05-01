@@ -29,7 +29,7 @@ public class UndoUpdateExecutor extends AbstractUndoExecutor
     @Override
     public void bindAfterImage(String sql, SQLUndoLog sqlUndoLog, Connection connection) throws SQLException
     {
-        sqlUndoLog.setAfterImage(TableData.buildTableData(getAfterResultSet(sqlUndoLog, connection),sqlUndoLog.getCurrTablePrimaryKey(),sqlUndoLog.getSqlCommandType()));
+        sqlUndoLog.setAfterImage(TableData.buildTableData(getAfterResultSet(sqlUndoLog, connection),sqlUndoLog.getCurrTablePrimaryKey()));
     }
 
     private ResultSet getAfterResultSet(SQLUndoLog sqlUndoLog, Connection connection) throws SQLException
@@ -44,9 +44,6 @@ public class UndoUpdateExecutor extends AbstractUndoExecutor
                 condition.append(primaryKeyValues.get(i));
         }
         condition.append(")");
-
-        primaryKeyValues.clear();
-
         String checkSql = String.format(CHECK_SQL, sqlUndoLog.getBeforeImage().getTableName(), condition);
         return connection.prepareStatement(checkSql).executeQuery();
     }

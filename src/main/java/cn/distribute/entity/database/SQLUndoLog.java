@@ -44,7 +44,7 @@ public class SQLUndoLog
 
         sqlUndoLog.setSqlCommandType(sqlCommandType);
         sqlUndoLog.setCurrTablePrimaryKey(primaryKey);
-        sqlUndoLog.setBeforeImage(TableData.buildTableData(resultSet, primaryKey,sqlCommandType));
+        sqlUndoLog.setBeforeImage(TableData.buildTableData(resultSet, primaryKey));
 
         return sqlUndoLog;
     }

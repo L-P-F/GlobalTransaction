@@ -35,7 +35,7 @@ public class UndoInsertExecutor extends AbstractUndoExecutor
     {
         List<Object> beforePrimaryKeyValues = new ArrayList<>();
         List<Object> afterPrimaryKeyValues = new ArrayList<>();
-        TableData afterImage = TableData.buildTableData(getResultSet(sql, connection), sqlUndoLog.getCurrTablePrimaryKey(),sqlUndoLog.getSqlCommandType());
+        TableData afterImage = TableData.buildTableData(getResultSet(sql, connection), sqlUndoLog.getCurrTablePrimaryKey());
 
 
         for (Row row : sqlUndoLog.getBeforeImage().getRows())
@@ -50,8 +50,6 @@ public class UndoInsertExecutor extends AbstractUndoExecutor
             afterPrimaryKeyValues.add(list.get(0).getValue());
         }
         afterPrimaryKeyValues.removeAll(beforePrimaryKeyValues);
-
-
         List<Row> rows = afterImage.getRows().stream()
                 .filter(row -> row.getFields().stream()
                         .filter(field -> field.getKeyType().equals(KeyType.PRIMARY_KEY))
@@ -61,6 +59,7 @@ public class UndoInsertExecutor extends AbstractUndoExecutor
 
 
         afterImage.setRows(rows);
+        afterImage.setPrimaryKeyValues(afterPrimaryKeyValues);
         sqlUndoLog.setAfterImage(afterImage);
     }
 
