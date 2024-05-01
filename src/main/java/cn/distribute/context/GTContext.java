@@ -3,7 +3,6 @@ package cn.distribute.context;
 import cn.distribute.entity.BT;
 import cn.distribute.entity.database.SQLUndoLog;
 import cn.distribute.enums.StatusEnum;
-import org.springframework.transaction.TransactionStatus;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -78,31 +77,28 @@ public class GTContext
     /**
      * 全局事务初始化
      */
-    public static void GTInit(String xid, TransactionStatus status)
+    public static void GTInit(String xid)
     {
         setXid(xid);
-        BTInit(xid, status);
+        BTInit(xid);
     }
 
     /**
      * 分支事务初始化
      */
-    public static void BTInit(String xid, TransactionStatus status)
+    public static void BTInit(String xid)
     {
         setBT(BT.builder()
                 .xid(xid)
                 .status(StatusEnum.START.getCode())
-                .transactionStatus(status)
                 .build());//绑定BT到当前线程
     }
 
     /**
      * 普通本地事务初始化
      */
-    public static void CTInit(TransactionStatus status)
+    public static void CTInit()
     {
-        setBT(BT.builder()
-                .transactionStatus(status)
-                .build());
+        setBT(BT.builder().build());
     }
 }

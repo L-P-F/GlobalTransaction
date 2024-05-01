@@ -20,15 +20,16 @@ public class UndoDeleteExecutor extends AbstractUndoExecutor
     @Override
     public SQLUndoLog buildSQLUndoLog(String sql, Connection connection, String tableName) throws SQLException
     {
-        ResultSet primaryKeys = connection.getMetaData().getPrimaryKeys(null, null, tableName);
-        String primaryKey = null;
-        if (primaryKeys.next())
-            primaryKey = primaryKeys.getString("COLUMN_NAME");
-        return SQLUndoLog.buildSQLUndoLog(getResultSet(sql, connection), SqlCommandType.DELETE, primaryKey);
+        return SQLUndoLog.buildSQLUndoLog(getResultSet(sql, connection), SqlCommandType.DELETE, getPrimaryKey(tableName, connection));
     }
 
     @Override
-    public ResultSet getResultSet(String sql, Connection connection) throws SQLException
+    public void bindAfterImage(String sql,SQLUndoLog sqlUndoLog, Connection connection) throws SQLException
+    {
+        sqlUndoLog.setAfterImage(null);
+    }
+
+    private ResultSet getResultSet(String sql, Connection connection) throws SQLException
     {
         // 使用正则表达式提取DELETE语句中的表名和删除条件
         Pattern pattern = Pattern.compile("^DELETE\\s+FROM\\s+(\\w+)\\s+(?:WHERE\\s+(.+))?$");

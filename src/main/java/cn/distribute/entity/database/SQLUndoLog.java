@@ -1,17 +1,11 @@
 package cn.distribute.entity.database;
 
-import cn.distribute.entity.database.entity.Field;
-import cn.distribute.entity.database.entity.KeyType;
-import cn.distribute.entity.database.entity.Row;
 import cn.distribute.entity.database.entity.TableData;
 import lombok.Data;
 import org.apache.ibatis.mapping.SqlCommandType;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * 2024-04-29 17:07
@@ -20,12 +14,24 @@ import java.util.stream.Collectors;
 @Data
 public class SQLUndoLog
 {
+    /**
+     * 当前表的主键名
+     */
     private String currTablePrimaryKey;
 
+    /**
+     * 当前sql操作类型
+     */
     private SqlCommandType sqlCommandType;
 
+    /**
+     * 前置镜像
+     */
     private TableData beforeImage;
 
+    /**
+     * 后置镜像
+     */
     private TableData afterImage;
 
     private SQLUndoLog()
@@ -38,43 +44,8 @@ public class SQLUndoLog
 
         sqlUndoLog.setSqlCommandType(sqlCommandType);
         sqlUndoLog.setCurrTablePrimaryKey(primaryKey);
-        sqlUndoLog.setBeforeImage(TableData.buildTableData(resultSet, primaryKey));
+        sqlUndoLog.setBeforeImage(TableData.buildTableData(resultSet, primaryKey,sqlCommandType));
 
         return sqlUndoLog;
-    }
-
-    public void bindAfterImage(ResultSet resultSet) throws SQLException
-    {
-        switch (this.sqlCommandType)
-        {
-            case INSERT ->
-            {
-                List<Object> primaryKeyValues = new ArrayList<>();
-                TableData afterImage = TableData.buildTableData(resultSet, this.currTablePrimaryKey);
-                for (Row row : this.beforeImage.getRows())
-                {
-                    List<Field> list = row.getFields().stream().filter(field -> field.getKeyType().equals(KeyType.PRIMARY_KEY)).toList();
-                    primaryKeyValues.add(list.get(0).getValue());
-                }
-//                this.beforeImage = null;
-                System.err.println("primaryKeyValues = " + primaryKeyValues);//todo
-                for (Row row : afterImage.getRows())
-                {
-                    List<Field> list = row.getFields().stream().filter(field -> field.getKeyType().equals(KeyType.PRIMARY_KEY)).toList();
-                    primaryKeyValues.remove(list.get(0).getValue());
-                }
-                System.err.println("primaryKeyValues = " + primaryKeyValues);//todo
-                List<Row> rows = afterImage.getRows().stream()
-                        .filter(row -> row.getFields().stream()
-                                .filter(field -> field.getKeyType().equals(KeyType.PRIMARY_KEY))
-                                .map(Field::getValue)
-                                .noneMatch(primaryKeyValues::contains))
-                        .collect(Collectors.toList());
-                afterImage.setRows(rows);
-                this.setAfterImage(afterImage);
-            }
-            case DELETE -> this.setAfterImage(null);
-            case UPDATE -> this.setAfterImage(TableData.buildTableData(resultSet, this.currTablePrimaryKey));
-        }
     }
 }

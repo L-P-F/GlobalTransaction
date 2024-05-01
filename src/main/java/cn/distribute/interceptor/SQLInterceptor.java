@@ -1,7 +1,6 @@
 package cn.distribute.interceptor;
 
 import cn.distribute.context.GTContext;
-import cn.distribute.entity.database.SQLUndoLog;
 import cn.distribute.entity.database.UndoExecutorFactory;
 import cn.distribute.entity.database.undoExecutor.AbstractUndoExecutor;
 import com.baomidou.mybatisplus.core.metadata.TableInfoHelper;
@@ -43,12 +42,13 @@ public class SQLInterceptor implements Interceptor
         AbstractUndoExecutor undoExecutor = UndoExecutorFactory.getUndoExecutor(((MappedStatement) invocation.getArgs()[0]).getSqlCommandType());
         log.info("SQL:==> {}", sql);
 
-        SQLUndoLog sqlUndoLog = undoExecutor.buildSQLUndoLog(sql, connection, getTableName(sql));
-        GTContext.setSQLUndoLog(sqlUndoLog);
+        GTContext.setSQLUndoLog(undoExecutor.buildSQLUndoLog(sql, connection, getTableName(sql)));
+
 
         Object result = invocation.proceed();
 
-        GTContext.getLastSQLUndoLog().bindAfterImage(undoExecutor.getResultSet(sql, connection));
+
+        undoExecutor.bindAfterImage(sql, GTContext.getLastSQLUndoLog(), connection);
         return result;
     }
 

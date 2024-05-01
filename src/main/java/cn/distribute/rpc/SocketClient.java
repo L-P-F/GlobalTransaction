@@ -1,19 +1,23 @@
 package cn.distribute.rpc;
 
 import cn.distribute.entity.BT;
-import cn.distribute.entity.TransactionResource;
+import cn.distribute.entity.database.SQLUndoLog;
+import cn.distribute.entity.database.UndoExecutorFactory;
+import cn.distribute.entity.database.undoExecutor.AbstractUndoExecutor;
 import cn.distribute.enums.ReqPathEnum;
 import cn.distribute.enums.StatusEnum;
 import jakarta.websocket.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Async;
-import org.springframework.transaction.support.TransactionTemplate;
 
+import javax.sql.DataSource;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.time.LocalDateTime;
-import java.util.Objects;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -61,27 +65,30 @@ public class SocketClient
         log.debug("关闭连接,当前分支事务结束");
     }
 
-    private void judgeMessage(BT bt, TransactionTemplate transactionTemplate, TransactionResource transactionResource)
+    private void judgeMessage(BT bt, DataSource dataSource, List<SQLUndoLog> sqlUndoLogs)
     {
         boolean commitOrRollback = StatusEnum.TRUE.getMsg().equals(latestMessage);
         log.warn("{} 号分支事务收到服务器指令: " + (commitOrRollback ? "【提交】" : "【回滚】"), bt.getExecuteOrder());
-        if (transactionResource != null)
-            transactionResource.autoWiredTransactionResource();
-
-        if (commitOrRollback)
-            Objects.requireNonNull(transactionTemplate.getTransactionManager()).commit(bt.getTransactionStatus());
-        else
-            Objects.requireNonNull(transactionTemplate.getTransactionManager()).rollback(bt.getTransactionStatus());
-
-        if (transactionResource != null)
+        if (!commitOrRollback)
         {
-            transactionResource.removeTransactionResource();
-            log.warn("{} 号分支事务" + (commitOrRollback ? "【提交】" : "【回滚】") + "成功", bt.getExecuteOrder());
-        } else
-            log.warn("全局事务" + (commitOrRollback ? "【提交】" : "【回滚】") + "成功,与服务器断开连接");
+            try (Connection connection = dataSource.getConnection())
+            {
+                for (int i = sqlUndoLogs.size() - 1; i >= 0; i--)
+                {
+                    SQLUndoLog sqlUndoLog = sqlUndoLogs.get(i);
+                    AbstractUndoExecutor undoExecutor = UndoExecutorFactory.getUndoExecutor(sqlUndoLog.getSqlCommandType());
+                    undoExecutor.rollback(sqlUndoLog, connection);
+                }
+            } catch (SQLException e)
+            {
+                throw new RuntimeException(e);
+            }
+        }
+        log.warn("{} 号分支事务" + (commitOrRollback ? "【提交】" : "【回滚】") + "成功", bt.getExecuteOrder());
+        log.warn("全局事务" + (commitOrRollback ? "【提交】" : "【回滚】") + "成功,与服务器断开连接");
     }
 
-    private void connectToServer(BT bt, String executeStatus, TransactionTemplate transactionTemplate, TransactionResource transactionResource)
+    private void connectToServer(BT bt, String executeStatus, DataSource dataSource, List<SQLUndoLog> sqlUndoLogs)
     {
         try
         {
@@ -97,23 +104,23 @@ public class SocketClient
             while (true)
                 if (flag.compareAndSet(true, false))
                     break;
-            judgeMessage(bt, transactionTemplate, transactionResource);
+            judgeMessage(bt, dataSource, sqlUndoLogs);
         } catch (URISyntaxException | DeploymentException | IOException e)
         {
             log.error("连接GT服务器出现异常: {},已控制所有事务【回滚】,请检查是否已经成功启动【GT-server】", e.getMessage());
             latestMessage = StatusEnum.FALSE.getMsg();
-            judgeMessage(bt, transactionTemplate, transactionResource);
+            judgeMessage(bt, dataSource, sqlUndoLogs);
         }
     }
 
     @Async(value = "asyncTaskExecutor")
-    public void BTTryToConnect(BT bt, String executeStatus, TransactionTemplate transactionTemplate, TransactionResource transactionResource)
+    public void BTTryToConnect(BT bt, String executeStatus, DataSource dataSource, List<SQLUndoLog> sqlUndoLogs)
     {
-        connectToServer(bt, executeStatus, transactionTemplate, transactionResource);
+        connectToServer(bt, executeStatus, dataSource, sqlUndoLogs);
     }
 
-    public void GTTryToConnect(BT bt, String executeStatus, TransactionTemplate transactionTemplate)
+    public void GTTryToConnect(BT bt, String executeStatus, DataSource dataSource, List<SQLUndoLog> sqlUndoLogs)
     {
-        connectToServer(bt, executeStatus, transactionTemplate, null);
+        connectToServer(bt, executeStatus, dataSource, sqlUndoLogs);
     }
 }
