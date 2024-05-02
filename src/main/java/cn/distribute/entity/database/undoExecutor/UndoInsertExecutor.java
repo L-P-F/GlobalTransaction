@@ -81,22 +81,22 @@ public class UndoInsertExecutor extends AbstractUndoExecutor
     }
 
     @Override
-    protected String buildUndoSQL(TableData beforeImage)
+    protected String buildUndoSQL(TableData afterImage)
     {
-        List<Field> primaryKeys = beforeImage.getRows().get(0).primaryKeys();
+        List<Field> primaryKeys = afterImage.getRows().get(0).primaryKeys();
         StringBuilder condition = new StringBuilder();
         for (int i = 0; i < primaryKeys.size(); i++)
         {
             if (i != 0) condition.append(" and ");
             condition.append(primaryKeys.get(i).getFieldName()).append(" = ?");
         }
-        return String.format(DELETE_SQL, beforeImage.getTableName(), condition);
+        return String.format(DELETE_SQL, afterImage.getTableName(), condition);
     }
 
     private ResultSet getResultSet(String sql, Connection connection) throws SQLException
     {
         // 使用正则表达式提取INSERT语句中的表名、插入的列和值
-        Pattern pattern = Pattern.compile("^INSERT\\s+INTO\\s+(\\w+)\\s*\\(([^)]+)\\)\\s+VALUES\\s*\\(([^)]+)\\)$");
+        Pattern pattern = Pattern.compile("^INSERT\\s+INTO\\s+(\\w+)\\s*\\(([^)]+)\\)\\s+VALUES\\s*\\(([^)]+)\\)(?:\\s*,\\s*\\(([^)]+)\\))*$");
         Matcher matcher = pattern.matcher(sql);
         if (matcher.find())
         {

@@ -89,7 +89,7 @@ public abstract class AbstractUndoExecutor
 
     protected abstract ResultSet getCurrResultSet(SQLUndoLog sqlUndoLog, Connection connection) throws SQLException;
 
-    protected abstract String buildUndoSQL(TableData beforeImage);
+    protected abstract String buildUndoSQL(TableData image);
 
     protected String getPrimaryKey(String tableName, Connection connection) throws SQLException
     {
