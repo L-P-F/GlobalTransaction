@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
 import javax.sql.DataSource;
+import java.sql.SQLException;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -55,7 +56,7 @@ public class GTAspect
         Object result = point.proceed();
 
         //同步对接服务器,等待服务器通知commit OR rollback
-        GTCommitOrRollback(StatusEnum.TRUE);
+        GTCommitOrRollback(StatusEnum.TRUE, StatusEnum.NONE_EXCEPTION);
         GTContext.clear();//防止内存泄漏
 
         return result;
@@ -78,7 +79,7 @@ public class GTAspect
 
         if (xid != null)
             //异步对接服务器,等待服务器通知commit OR rollback
-            BTCommitOrRollback(StatusEnum.TRUE);
+            BTCommitOrRollback(StatusEnum.TRUE, StatusEnum.NONE_EXCEPTION);
 
         return result;
     }
@@ -88,7 +89,9 @@ public class GTAspect
     {
         log.error("事务异常: {},隶属于全局事务: {},在全局事务中处于第{}位", e.getMessage(), GTContext.getXid(), GTContext.getBT().getExecuteOrder());
         log.error("开始向服务器推送【回滚】请求");
-        GTCommitOrRollback(StatusEnum.FALSE);
+        if (e instanceof SQLException)
+            GTCommitOrRollback(StatusEnum.FALSE, StatusEnum.SQL_EXCEPTION);
+        else GTCommitOrRollback(StatusEnum.FALSE, StatusEnum.SERVER_EXCEPTION);
         GTContext.clear();//防止内存泄漏
     }
 
@@ -97,19 +100,21 @@ public class GTAspect
     {
         log.error("事务异常: {},隶属于全局事务: {},在全局事务中处于第{}位", e.getMessage(), GTContext.getXid(), GTContext.getBT().getExecuteOrder());
         log.error("开始向服务器推送【回滚】请求");
-        BTCommitOrRollback(StatusEnum.FALSE);
+        if (e instanceof SQLException)
+            BTCommitOrRollback(StatusEnum.FALSE, StatusEnum.SQL_EXCEPTION);
+        else BTCommitOrRollback(StatusEnum.FALSE, StatusEnum.SERVER_EXCEPTION);
     }
 
 
-    private void GTCommitOrRollback(StatusEnum statusEnum)
+    private void GTCommitOrRollback(StatusEnum statusEnum, StatusEnum exceptionEnum)
     {
         AnnotationConfigApplicationContext ac = new AnnotationConfigApplicationContext(GTSocketClientAutoConfigure.class);
-        ac.getBean(SocketClient.class).GTTryToConnect(GTContext.getBT(), statusEnum.getMsg(), dataSource, GTContext.getSQLUndoLogs());
+        ac.getBean(SocketClient.class).GTTryToConnect(GTContext.getBT(), statusEnum.getMsg(), dataSource, GTContext.getSQLUndoLogs(), exceptionEnum);
     }
 
-    private void BTCommitOrRollback(StatusEnum statusEnum)
+    private void BTCommitOrRollback(StatusEnum statusEnum, StatusEnum exceptionEnum)
     {
         AnnotationConfigApplicationContext ac = new AnnotationConfigApplicationContext(GTSocketClientAutoConfigure.class);
-        ac.getBean(SocketClient.class).BTTryToConnect(GTContext.getBT(), statusEnum.getMsg(), dataSource, GTContext.getSQLUndoLogs());
+        ac.getBean(SocketClient.class).BTTryToConnect(GTContext.getBT(), statusEnum.getMsg(), dataSource, GTContext.getSQLUndoLogs(), exceptionEnum);
     }
 }

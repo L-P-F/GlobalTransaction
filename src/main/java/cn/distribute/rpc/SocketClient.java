@@ -65,17 +65,26 @@ public class SocketClient
         log.debug("关闭连接,当前分支事务结束");
     }
 
-    private void judgeMessage(BT bt, DataSource dataSource, List<SQLUndoLog> sqlUndoLogs)
+    private void judgeMessage(BT bt, DataSource dataSource, List<SQLUndoLog> sqlUndoLogs, StatusEnum exceptionEnum)
     {
         boolean commitOrRollback = StatusEnum.TRUE.getMsg().equals(latestMessage);
         log.warn("{} 号分支事务收到服务器指令: " + (commitOrRollback ? "【提交】" : "【回滚】"), bt.getExecuteOrder());
         if (!commitOrRollback)
         {
+            int undoIndex = sqlUndoLogs.size() - 1;
+            switch (exceptionEnum)
+            {
+                case NONE_EXCEPTION, SERVER_EXCEPTION -> undoIndex = sqlUndoLogs.size() - 1;
+                case SQL_EXCEPTION -> undoIndex--;
+            }
+
             try (Connection connection = dataSource.getConnection())
             {
-                for (int i = sqlUndoLogs.size() - 1; i >= 0; i--)
+                for (int i = undoIndex; i >= 0; i--)
                 {
                     SQLUndoLog sqlUndoLog = sqlUndoLogs.get(i);
+                    if(sqlUndoLog.getBeforeImage() == null && sqlUndoLog.getAfterImage() == null)
+                        continue;
                     AbstractUndoExecutor undoExecutor = UndoExecutorFactory.getUndoExecutor(sqlUndoLog.getSqlCommandType());
                     undoExecutor.rollback(sqlUndoLog, connection);
                 }
@@ -88,7 +97,7 @@ public class SocketClient
         log.warn("全局事务" + (commitOrRollback ? "【提交】" : "【回滚】") + "成功,与服务器断开连接");
     }
 
-    private void connectToServer(BT bt, String executeStatus, DataSource dataSource, List<SQLUndoLog> sqlUndoLogs)
+    private void connectToServer(BT bt, String executeStatus, DataSource dataSource, List<SQLUndoLog> sqlUndoLogs, StatusEnum exceptionEnum)
     {
         try
         {
@@ -104,23 +113,23 @@ public class SocketClient
             while (true)
                 if (flag.compareAndSet(true, false))
                     break;
-            judgeMessage(bt, dataSource, sqlUndoLogs);
+            judgeMessage(bt, dataSource, sqlUndoLogs, exceptionEnum);
         } catch (URISyntaxException | DeploymentException | IOException e)
         {
             log.error("连接GT服务器出现异常: {},已控制所有事务【回滚】,请检查是否已经成功启动【GT-server】", e.getMessage());
             latestMessage = StatusEnum.FALSE.getMsg();
-            judgeMessage(bt, dataSource, sqlUndoLogs);
+            judgeMessage(bt, dataSource, sqlUndoLogs, exceptionEnum);
         }
     }
 
     @Async(value = "asyncTaskExecutor")
-    public void BTTryToConnect(BT bt, String executeStatus, DataSource dataSource, List<SQLUndoLog> sqlUndoLogs)
+    public void BTTryToConnect(BT bt, String executeStatus, DataSource dataSource, List<SQLUndoLog> sqlUndoLogs, StatusEnum exceptionEnum)
     {
-        connectToServer(bt, executeStatus, dataSource, sqlUndoLogs);
+        connectToServer(bt, executeStatus, dataSource, sqlUndoLogs, exceptionEnum);
     }
 
-    public void GTTryToConnect(BT bt, String executeStatus, DataSource dataSource, List<SQLUndoLog> sqlUndoLogs)
+    public void GTTryToConnect(BT bt, String executeStatus, DataSource dataSource, List<SQLUndoLog> sqlUndoLogs, StatusEnum exceptionEnum)
     {
-        connectToServer(bt, executeStatus, dataSource, sqlUndoLogs);
+        connectToServer(bt, executeStatus, dataSource, sqlUndoLogs, exceptionEnum);
     }
 }

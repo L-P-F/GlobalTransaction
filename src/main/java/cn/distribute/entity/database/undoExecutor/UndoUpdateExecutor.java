@@ -32,7 +32,9 @@ public class UndoUpdateExecutor extends AbstractUndoExecutor
     @Override
     public void bindAfterImage(String sql, SQLUndoLog sqlUndoLog, Connection connection) throws SQLException
     {
-        sqlUndoLog.setAfterImage(TableData.buildTableData(getAfterResultSet(sqlUndoLog, connection), sqlUndoLog.getCurrTablePrimaryKey()));
+        if(sqlUndoLog.getBeforeImage().getRows().size() == 0)
+            sqlUndoLog.setBeforeImage(null);
+        else sqlUndoLog.setAfterImage(TableData.buildTableData(getAfterResultSet(sqlUndoLog, connection), sqlUndoLog.getCurrTablePrimaryKey()));
     }
 
     @Override

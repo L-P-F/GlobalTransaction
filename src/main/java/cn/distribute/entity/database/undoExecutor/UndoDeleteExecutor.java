@@ -31,6 +31,8 @@ public class UndoDeleteExecutor extends AbstractUndoExecutor
     @Override
     public void bindAfterImage(String sql, SQLUndoLog sqlUndoLog, Connection connection)
     {
+        if(sqlUndoLog.getBeforeImage().getRows().size() == 0)
+            sqlUndoLog.setBeforeImage(null);
         sqlUndoLog.setAfterImage(null);
     }
 
