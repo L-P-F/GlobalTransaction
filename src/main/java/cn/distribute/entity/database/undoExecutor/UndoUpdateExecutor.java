@@ -4,6 +4,7 @@ import cn.distribute.entity.database.SQLUndoLog;
 import cn.distribute.entity.database.entity.Field;
 import cn.distribute.entity.database.entity.Row;
 import cn.distribute.entity.database.entity.TableData;
+import cn.distribute.until.CommonUtil;
 import org.apache.ibatis.mapping.SqlCommandType;
 
 import java.sql.Connection;
@@ -26,7 +27,9 @@ public class UndoUpdateExecutor extends AbstractUndoExecutor
     @Override
     public SQLUndoLog buildSQLUndoLog(String sql, Connection connection, String tableName) throws SQLException
     {
-        return SQLUndoLog.buildSQLUndoLog(getResultSet(sql, connection), UPDATE, getPrimaryKey(tableName, connection));
+        SQLUndoLog sqlUndoLog = SQLUndoLog.buildSQLUndoLog(getResultSet(sql, connection), UPDATE, getPrimaryKey(tableName, connection));
+        CommonUtil.tryLock(tableName,sqlUndoLog.getBeforeImage().getPrimaryKeyValues(), connection);
+        return sqlUndoLog;
     }
 
     @Override

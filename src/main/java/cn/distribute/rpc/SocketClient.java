@@ -70,25 +70,37 @@ public class SocketClient
     {
         boolean commitOrRollback = StatusEnum.TRUE.getMsg().equals(latestMessage);
         log.warn("{} 号分支事务收到服务器指令: " + (commitOrRollback ? "【提交】" : "【回滚】"), bt.getExecuteOrder());
-        if (!commitOrRollback)
+        try
         {
-            int undoIndex = sqlUndoLogs.size() - 1;
-            switch (exceptionEnum)
+            if (!commitOrRollback)
             {
-                case NONE_EXCEPTION, SERVER_EXCEPTION -> undoIndex = sqlUndoLogs.size() - 1;
-                case SQL_EXCEPTION -> undoIndex--;
-            }
-
-            try (Connection connection = dataSource.getConnection())
-            {
-                for (int i = undoIndex; i >= 0; i--)
+                int undoIndex = sqlUndoLogs.size() - 1;
+                switch (exceptionEnum)
                 {
-                    SQLUndoLog sqlUndoLog = sqlUndoLogs.get(i);
-                    if(sqlUndoLog.getBeforeImage() == null && sqlUndoLog.getAfterImage() == null)
-                        continue;
-                    AbstractUndoExecutor undoExecutor = UndoExecutorFactory.getUndoExecutor(sqlUndoLog.getSqlCommandType());
-                    undoExecutor.rollback(sqlUndoLog, connection);
+                    case NONE_EXCEPTION, SERVER_EXCEPTION -> undoIndex = sqlUndoLogs.size() - 1;
+                    case SQL_EXCEPTION -> undoIndex--;
                 }
+
+                try (Connection connection = dataSource.getConnection())
+                {
+                    for (int i = undoIndex; i >= 0; i--)
+                    {
+                        SQLUndoLog sqlUndoLog = sqlUndoLogs.get(i);
+                        if(sqlUndoLog.getBeforeImage() == null && sqlUndoLog.getAfterImage() == null)
+                            continue;
+                        AbstractUndoExecutor undoExecutor = UndoExecutorFactory.getUndoExecutor(sqlUndoLog.getSqlCommandType());
+                        undoExecutor.rollback(sqlUndoLog, connection);
+                    }
+                } catch (SQLException e)
+                {
+                    throw new RuntimeException(e);
+                }
+            }
+        } finally
+        {
+            try
+            {
+                CommonUtil.releaseLock(bt.getXid(), dataSource.getConnection()); //无论提交还是回滚，最后都要释放锁
             } catch (SQLException e)
             {
                 throw new RuntimeException(e);

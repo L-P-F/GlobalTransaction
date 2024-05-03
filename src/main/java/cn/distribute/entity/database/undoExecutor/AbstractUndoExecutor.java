@@ -37,7 +37,8 @@ public abstract class AbstractUndoExecutor
             {
                 TableData currImage = TableData.buildTableData(getCurrResultSet(sqlUndoLog, connection), sqlUndoLog.getCurrTablePrimaryKey());
                 if (!sqlUndoLog.getAfterImage().equals(currImage))
-                    throw new RuntimeException("出现不可控异常,数据库信息被非当前事务篡改,请人工处理");
+                    throw new RuntimeException("出现不可控异常,数据库信息被非当前事务篡改,请人工处理.\n" +
+                            "回滚操作时的数据本应为" + sqlUndoLog.getAfterImage() + "但是实际为" + currImage);
             }
         }
 
