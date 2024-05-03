@@ -3,6 +3,7 @@ package cn.distribute.rpc;
 import cn.distribute.context.GTContext;
 import cn.distribute.entity.Result;
 import cn.distribute.enums.ReqPathEnum;
+import cn.distribute.until.CommonUtil;
 import com.alibaba.fastjson.JSON;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpEntity;
@@ -29,7 +30,7 @@ public class HTTPUtil
         log.debug("注册分支事务请求体: {}", jsonBody);
         try (CloseableHttpClient httpClient = HttpClients.createDefault())
         {
-            HttpPost httpPost = new HttpPost(ReqPathEnum.HTTP_SAVE.getUrl() + xid);
+            HttpPost httpPost = new HttpPost(CommonUtil.buildReqPath(ReqPathEnum.HTTP_SAVE) + xid);
             StringEntity entity = new StringEntity(jsonBody, ContentType.APPLICATION_JSON);
             httpPost.setEntity(entity);
             try (CloseableHttpResponse response = httpClient.execute(httpPost))

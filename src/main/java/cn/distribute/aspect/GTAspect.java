@@ -14,6 +14,7 @@ import org.aspectj.lang.annotation.Pointcut;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.dao.DuplicateKeyException;
 
 import javax.sql.DataSource;
 import java.sql.SQLException;
@@ -89,7 +90,7 @@ public class GTAspect
     {
         log.error("事务异常: {},隶属于全局事务: {},在全局事务中处于第{}位", e.getMessage(), GTContext.getXid(), GTContext.getBT().getExecuteOrder());
         log.error("开始向服务器推送【回滚】请求");
-        if (e instanceof SQLException)
+        if (e instanceof SQLException || e instanceof DuplicateKeyException)
             GTCommitOrRollback(StatusEnum.FALSE, StatusEnum.SQL_EXCEPTION);
         else GTCommitOrRollback(StatusEnum.FALSE, StatusEnum.SERVER_EXCEPTION);
         GTContext.clear();//防止内存泄漏
@@ -100,7 +101,7 @@ public class GTAspect
     {
         log.error("事务异常: {},隶属于全局事务: {},在全局事务中处于第{}位", e.getMessage(), GTContext.getXid(), GTContext.getBT().getExecuteOrder());
         log.error("开始向服务器推送【回滚】请求");
-        if (e instanceof SQLException)
+        if (e instanceof SQLException || e instanceof  DuplicateKeyException)
             BTCommitOrRollback(StatusEnum.FALSE, StatusEnum.SQL_EXCEPTION);
         else BTCommitOrRollback(StatusEnum.FALSE, StatusEnum.SERVER_EXCEPTION);
     }

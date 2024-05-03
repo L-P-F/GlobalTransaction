@@ -9,13 +9,15 @@ import lombok.Getter;
 @Getter
 public enum ReqPathEnum
 {
-    HTTP_SAVE("http://localhost:8573/save/"),
-    WEB_SOCKET_CONNECT("ws://localhost:8573/ws/");
+    HTTP_SAVE("http://","/save/"),
+    WEB_SOCKET_CONNECT("ws://","/ws/");
 
-    private final String url;
+    private final String urlPrefix;
+    private final String urlSuffix;
 
-    ReqPathEnum(String url)
+    ReqPathEnum(String urlPrefix,String urlSuffix)
     {
-        this.url = url;
+        this.urlPrefix = urlPrefix;
+        this.urlSuffix = urlSuffix;
     }
 }

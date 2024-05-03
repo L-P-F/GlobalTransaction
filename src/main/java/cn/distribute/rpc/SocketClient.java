@@ -6,6 +6,7 @@ import cn.distribute.entity.database.UndoExecutorFactory;
 import cn.distribute.entity.database.undoExecutor.AbstractUndoExecutor;
 import cn.distribute.enums.ReqPathEnum;
 import cn.distribute.enums.StatusEnum;
+import cn.distribute.until.CommonUtil;
 import jakarta.websocket.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Async;
@@ -101,7 +102,7 @@ public class SocketClient
     {
         try
         {
-            URI uri = new URI(ReqPathEnum.WEB_SOCKET_CONNECT.getUrl() + bt.getXid() + ("/") + (bt.getExecuteOrder()));
+            URI uri = new URI(CommonUtil.buildReqPath(ReqPathEnum.WEB_SOCKET_CONNECT) + bt.getXid() + ("/") + (bt.getExecuteOrder()));
             WebSocketContainer container = ContainerProvider.getWebSocketContainer();
 
             container.connectToServer(this, uri);
