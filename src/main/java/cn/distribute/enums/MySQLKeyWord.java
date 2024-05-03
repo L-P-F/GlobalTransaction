@@ -2,8 +2,10 @@ package cn.distribute.enums;
 
 import lombok.Getter;
 
-/*2024-05-01 16:52
- * Author: Aurora
+/**
+ * 2024-05-01 16:52
+ * <p>Author: Aurora-LPF</p>
+ * <p>mysql数据库中的关键字</p>
  */
 @Getter
 public enum MySQLKeyWord

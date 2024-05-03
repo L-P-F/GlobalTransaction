@@ -9,8 +9,10 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
-/*2024-04-29 21:03
- * Author: Aurora
+/**
+ * 2024-04-29 21:03
+ * <p>Author: Aurora-LPF</p>
+ * <p>获取的镜像数据</p>
  */
 @Data
 public class TableData

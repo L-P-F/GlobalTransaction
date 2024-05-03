@@ -19,8 +19,10 @@ import java.util.List;
 import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-/*2024-04-17 16:10
- * Author: Aurora
+/**
+ * 2024-04-17 16:10
+ * <p>Author: Aurora-LPF</p>
+ * <p>mybatis sql拦截器</p>
  */
 
 @Slf4j

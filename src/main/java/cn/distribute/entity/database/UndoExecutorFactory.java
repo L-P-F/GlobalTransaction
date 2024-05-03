@@ -5,7 +5,8 @@ import org.apache.ibatis.mapping.SqlCommandType;
 
 /**
  * 2024-04-29 16:21
- * Author: Aurora
+ * <p>Author: Aurora-LPF</p>
+ * <p>工厂模式管理DML语句三种类型操作的对象</p>
  */
 public class UndoExecutorFactory
 {

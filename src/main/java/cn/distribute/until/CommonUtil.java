@@ -11,8 +11,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 
-/*2024-05-03 12:10
- * Author: Aurora
+/**
+ * 2024-05-03 12:10
+ * <p>Author: Aurora-LPF</p>
  */
 @Data
 public class CommonUtil

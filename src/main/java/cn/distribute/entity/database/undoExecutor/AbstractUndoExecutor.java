@@ -17,7 +17,9 @@ import java.util.List;
 
 /**
  * 2024-04-29 16:22
- * Author: Aurora
+ * <p>Author: Aurora-LPF</p>
+ * <P>回滚执行</P>
+ * <p>借鉴seata中对于mysql数据库的回滚执行,如有冒犯请告知</p>
  */
 @Slf4j
 public abstract class AbstractUndoExecutor

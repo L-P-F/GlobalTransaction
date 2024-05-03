@@ -7,7 +7,8 @@ import java.util.List;
 
 /**
  * 2024-04-29 21:00
- * Author: Aurora
+ * <p>Author: Aurora-LPF</p>
+ * <p>目标表中每行数据</p>
  */
 @Data
 public class Row

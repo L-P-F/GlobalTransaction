@@ -2,8 +2,9 @@ package cn.distribute.until;
 
 import cn.distribute.enums.MySQLKeyWord;
 
-/*2024-05-01 17:13
- * Author: Aurora
+/**
+ * 2024-05-01 17:13
+ * <p>Author: Aurora-LPF</p>
  */
 public class CircumventionKeyWord
 {

@@ -7,7 +7,8 @@ import java.util.Map;
 
 /**
  * 2024-05-01 14:07
- * Author: Aurora
+ * <p>Author: Aurora-LPF</p>
+ * <p>借鉴seata中的SerialArray,如有冒犯请告知</p>
  */
 public class SerialArray extends javax.sql.rowset.serial.SerialArray implements Array, Serializable
 {
