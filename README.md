@@ -79,7 +79,7 @@ public class UserServiceImpl implements UserService{
 
 <p style="color:cyan">PS:因为作者也有点懒了QAQ,后续有时间再考虑实现吧</p>
 
->本依赖在处理批量处理的sql操作的时候，不能处理mybatis-plus封装好的batch操作的一系列方法,作者暂时没找到解决方法,如果有批处理操作,还请使用mybatis的动态sql实现
+>本依赖在处理批量sql操作的时候，不能处理mybatis-plus封装好的batch操作的一系列方法,作者暂时没找到解决方法,如果有批处理操作,还请使用mybatis的动态sql实现
 ## 5.运行GTServer服务器
 
 [GTServer-2.0.zip下载路径](https://github.com/L-P-F/GlobalTransaction-Server/releases/tag/GTServer)
