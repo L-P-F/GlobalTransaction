@@ -1,0 +1,21 @@
+{
+  "groups": [
+    {
+      "name": "gt.server",
+      "type": "cn.distribute.properties.GTConfigurationProperties",
+      "sourceType": "cn.distribute.properties.GTConfigurationProperties"
+    }
+  ],
+  "properties": [
+    {
+      "name": "gt.server.server-addr",
+      "type": "java.lang.String",
+      "defaultValue": "127.0.0.1:8573"
+    },
+    {
+      "name": "gt.server.undo-table-name",
+      "type": "java.lang.String",
+      "defaultValue": "undo_log"
+    }
+  ]
+}
