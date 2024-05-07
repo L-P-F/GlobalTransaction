@@ -69,7 +69,7 @@ public class SocketClient
     private void judgeMessage(BT bt, DataSource dataSource, List<SQLUndoLog> sqlUndoLogs, StatusEnum exceptionEnum)
     {
         boolean commitOrRollback = StatusEnum.TRUE.getMsg().equals(latestMessage);
-        log.warn("{} 号分支事务收到服务器指令: " + (commitOrRollback ? "【提交】" : "【回滚】"), bt.getExecuteOrder());
+        log.warn("{} | {} 号分支事务收到服务器指令: " + (commitOrRollback ? "【提交】" : "【回滚】"), bt.getXid(), bt.getExecuteOrder());
         try
         {
             if (!commitOrRollback)
@@ -86,7 +86,7 @@ public class SocketClient
                     for (int i = undoIndex; i >= 0; i--)
                     {
                         SQLUndoLog sqlUndoLog = sqlUndoLogs.get(i);
-                        if(sqlUndoLog.getBeforeImage() == null && sqlUndoLog.getAfterImage() == null)
+                        if (sqlUndoLog.getBeforeImage() == null && sqlUndoLog.getAfterImage() == null)
                             continue;
                         AbstractUndoExecutor undoExecutor = UndoExecutorFactory.getUndoExecutor(sqlUndoLog.getSqlCommandType());
                         undoExecutor.rollback(sqlUndoLog, connection);
@@ -101,15 +101,15 @@ public class SocketClient
         {
             try (Connection connection = dataSource.getConnection())
             {
-                CommonUtil.releaseLock(bt.getXid(),connection); //无论提交还是回滚，最后都要释放锁
+                CommonUtil.releaseLock(bt.getXid(), connection); //无论提交还是回滚，最后都要释放锁
             } catch (SQLException e)
             {
                 log.error("GT释放锁时出现异常: {},继续工作会导致连接池资源耗尽!请立即通知开发人员!", e.getMessage());
                 throw new RuntimeException("GT释放锁时出现异常,继续工作会导致连接池资源耗尽!请立即通知开发人员!" + e);
             }
         }
-        log.warn("{} 号分支事务" + (commitOrRollback ? "【提交】" : "【回滚】") + "成功", bt.getExecuteOrder());
-        log.warn("全局事务" + (commitOrRollback ? "【提交】" : "【回滚】") + "成功,与服务器断开连接");
+        log.warn("{} | {} 号分支事务" + (commitOrRollback ? "【提交】" : "【回滚】") + "成功", bt.getXid(), bt.getExecuteOrder());
+        log.warn("全局事务 {}" + (commitOrRollback ? "【提交】" : "【回滚】") + "成功,与服务器断开连接", bt.getXid());
     }
 
     private void connectToServer(BT bt, String executeStatus, DataSource dataSource, List<SQLUndoLog> sqlUndoLogs, StatusEnum exceptionEnum)
@@ -122,7 +122,7 @@ public class SocketClient
             container.connectToServer(this, uri);
             container.setDefaultMaxSessionIdleTimeout(6000L);
 
-            log.warn("{} 号分支事务成功对接服务器,发送执行状态: {}", bt.getExecuteOrder(), executeStatus);
+            log.warn("{} | {} 号分支事务成功对接服务器,发送执行状态: {}", bt.getXid(), bt.getExecuteOrder(), executeStatus);
             session.getBasicRemote().sendText(executeStatus);
 
             while (true)
