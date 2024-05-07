@@ -10,6 +10,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * 2024-05-03 12:10
@@ -44,29 +45,32 @@ public class CommonUtil
 
         for (int i = 0; i < primaryKeyValues.size(); i++)
         {
-            if(i > 0)
+            if (i > 0)
             {
                 select.append(",");
                 insert.append(",");
             }
             select.append("'").append(primaryKeyValues.get(i)).append("'");
-            insert.append("('").append(GTContext.getXid()).append("','").append(tableName).append("',").append(primaryKeyValues.get(i)).append(")");
+            insert.append("('").append(GTContext.getXid()).append("','").append(tableName).append("','").append(primaryKeyValues.get(i)).append("')");
         }
         select.append(")");
 
 
         ResultSet resultSet = connection.prepareStatement(select.toString()).executeQuery();
-        if(!resultSet.next())
+        AtomicBoolean hasNext = new AtomicBoolean(false);
+        while (resultSet.next())
+        {
+            hasNext.set(true);
+            if (!GTContext.getXid().equals(resultSet.getString("xid")))
+                throw new RuntimeException("target data has been locked by other transaction");
+        }
+        if (!hasNext.get())
         {
             try (PreparedStatement statement = connection.prepareStatement(insert.toString()))
             {
                 statement.executeUpdate();
             }
         }
-        else
-            while (resultSet.next())
-                if(!GTContext.getXid().equals(resultSet.getString("xid")))
-                    throw new RuntimeException("target data has been locked by other transaction");
     }
 
     public static void releaseLock(String xid, Connection connection) throws SQLException

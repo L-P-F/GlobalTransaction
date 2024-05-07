@@ -72,7 +72,7 @@ public class SocketClient
         log.warn("{} | {} 号分支事务收到服务器指令: " + (commitOrRollback ? "【提交】" : "【回滚】"), bt.getXid(), bt.getExecuteOrder());
         try
         {
-            if (!commitOrRollback)
+            if (!commitOrRollback && sqlUndoLogs != null)
             {
                 int undoIndex = sqlUndoLogs.size() - 1;
                 switch (exceptionEnum)

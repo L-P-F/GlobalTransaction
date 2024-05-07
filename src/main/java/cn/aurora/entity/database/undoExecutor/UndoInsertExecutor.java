@@ -5,6 +5,7 @@ import cn.aurora.entity.database.entity.Field;
 import cn.aurora.entity.database.entity.KeyType;
 import cn.aurora.entity.database.entity.Row;
 import cn.aurora.entity.database.entity.TableData;
+import cn.aurora.until.CommonUtil;
 import org.apache.ibatis.mapping.SqlCommandType;
 
 import java.sql.Connection;
@@ -105,9 +106,35 @@ public class UndoInsertExecutor extends AbstractUndoExecutor
             String columns = matcher.group(2);
             String values = matcher.group(3);
 
+
+            String[] split = columns.split(",");
+            for (int i = 0; i < split.length; i++)
+            {
+                if (split[i].trim().equals(getPrimaryKey(tableName, connection)))
+                {
+                    tryLock(tableName, i, values, connection);
+                    break;
+                }
+            }
+
             String checkSql = String.format(NON_CONDITION_CHECK_SQL, tableName);
             return connection.prepareStatement(checkSql).executeQuery();
         } else
             throw new SQLException("Invalid INSERT statement: " + sql);
+    }
+
+    private void tryLock(String tableName, int index, String values, Connection connection) throws SQLException
+    {
+        Pattern pattern = Pattern.compile("\\([^)]+\\)");
+        Matcher matcher = pattern.matcher(values);
+        List<Object> primaryKeyValues = new ArrayList<>();
+        while (matcher.find())
+        {
+            primaryKeyValues.add(matcher.group()
+                    .substring(1, matcher.group().length() - 1)
+                    .split(",")[index]
+                    .trim());
+        }
+        CommonUtil.tryLock(tableName, primaryKeyValues, connection);
     }
 }

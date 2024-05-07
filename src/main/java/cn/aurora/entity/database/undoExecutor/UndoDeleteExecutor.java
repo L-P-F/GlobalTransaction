@@ -4,6 +4,7 @@ import cn.aurora.entity.database.SQLUndoLog;
 import cn.aurora.entity.database.entity.Field;
 import cn.aurora.entity.database.entity.Row;
 import cn.aurora.entity.database.entity.TableData;
+import cn.aurora.until.CommonUtil;
 import org.apache.ibatis.mapping.SqlCommandType;
 
 import java.sql.Connection;
@@ -26,7 +27,10 @@ public class UndoDeleteExecutor extends AbstractUndoExecutor
     @Override
     public SQLUndoLog buildSQLUndoLog(String sql, Connection connection, String tableName) throws SQLException
     {
-        return SQLUndoLog.buildSQLUndoLog(getResultSet(sql, connection), DELETE, getPrimaryKey(tableName, connection));
+        SQLUndoLog sqlUndoLog = SQLUndoLog.buildSQLUndoLog(getResultSet(sql, connection), DELETE, getPrimaryKey(tableName, connection));
+        if (sqlUndoLog.getBeforeImage().getRows().size() != 0)
+            CommonUtil.tryLock(tableName,sqlUndoLog.getBeforeImage().getPrimaryKeyValues(), connection);
+        return sqlUndoLog;
     }
 
     @Override
