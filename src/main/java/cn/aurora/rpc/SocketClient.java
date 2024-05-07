@@ -93,7 +93,8 @@ public class SocketClient
                     }
                 } catch (SQLException e)
                 {
-                    throw new RuntimeException(e);
+                    log.error("回滚事务时出现异常: {},请立即通知开发人员!", e.getMessage());
+                    throw new RuntimeException("回滚事务时出现异常,请立即通知开发人员!" + e);
                 }
             }
         } finally
@@ -103,7 +104,8 @@ public class SocketClient
                 CommonUtil.releaseLock(bt.getXid(),connection); //无论提交还是回滚，最后都要释放锁
             } catch (SQLException e)
             {
-                throw new RuntimeException(e);
+                log.error("GT释放锁时出现异常: {},继续工作会导致连接池资源耗尽!请立即通知开发人员!", e.getMessage());
+                throw new RuntimeException("GT释放锁时出现异常,继续工作会导致连接池资源耗尽!请立即通知开发人员!" + e);
             }
         }
         log.warn("{} 号分支事务" + (commitOrRollback ? "【提交】" : "【回滚】") + "成功", bt.getExecuteOrder());
