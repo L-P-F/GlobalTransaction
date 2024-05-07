@@ -8,9 +8,9 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
  * <p>Author: Aurora-LPF</p>
  */
 @Data
-@ConfigurationProperties("gt.server")
+@ConfigurationProperties(prefix = "gt.server")
 public class GTConfigurationProperties
 {
-    private String serverAddr;
-    private String undoTableName;
+    private String serverAddr = "localhost:8573";
+    private String undoTableName = "undo_log";
 }

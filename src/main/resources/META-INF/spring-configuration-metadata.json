@@ -2,8 +2,8 @@
   "groups": [
     {
       "name": "gt.server",
-      "type": "cn.distribute.properties.GTConfigurationProperties",
-      "sourceType": "cn.distribute.properties.GTConfigurationProperties"
+      "type": "cn.aurora.properties.GTConfigurationProperties",
+      "sourceType": "cn.aurora.properties.GTConfigurationProperties"
     }
   ],
   "properties": [
