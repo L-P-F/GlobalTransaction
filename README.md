@@ -1,6 +1,6 @@
 # GT使用简要说明
 
-<p style="color:green">该项目为本人从 0->1 自主开发XA模式分布式事务管理</p>
+<p style="color:green">该项目为本人从 0->1 自主开发XA|AT模式分布式事务管理</p>
 
 >本依赖采用**jdk17+spring-boot3.0.0**开发
 
@@ -12,8 +12,8 @@
 ```xml
 <dependency>
     <groupId>cn.distributed</groupId>
-    <artifactId>distribute-transaction-client</artifactId>
-    <version>1.0</version>
+    <artifactId>ara-distribute-transaction-client</artifactId>
+    <version>2.0</version>
 </dependency>
 ```
 
