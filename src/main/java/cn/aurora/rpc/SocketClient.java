@@ -98,9 +98,9 @@ public class SocketClient
             }
         } finally
         {
-            try
+            try (Connection connection = dataSource.getConnection())
             {
-                CommonUtil.releaseLock(bt.getXid(), dataSource.getConnection()); //无论提交还是回滚，最后都要释放锁
+                CommonUtil.releaseLock(bt.getXid(),connection); //无论提交还是回滚，最后都要释放锁
             } catch (SQLException e)
             {
                 throw new RuntimeException(e);
