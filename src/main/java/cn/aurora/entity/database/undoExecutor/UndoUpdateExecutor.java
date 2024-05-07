@@ -28,7 +28,8 @@ public class UndoUpdateExecutor extends AbstractUndoExecutor
     public SQLUndoLog buildSQLUndoLog(String sql, Connection connection, String tableName) throws SQLException
     {
         SQLUndoLog sqlUndoLog = SQLUndoLog.buildSQLUndoLog(getResultSet(sql, connection), UPDATE, getPrimaryKey(tableName, connection));
-        CommonUtil.tryLock(tableName,sqlUndoLog.getBeforeImage().getPrimaryKeyValues(), connection);
+        if (sqlUndoLog.getBeforeImage().getRows().size() != 0)
+            CommonUtil.tryLock(tableName,sqlUndoLog.getBeforeImage().getPrimaryKeyValues(), connection);
         return sqlUndoLog;
     }
 
@@ -36,7 +37,10 @@ public class UndoUpdateExecutor extends AbstractUndoExecutor
     public void bindAfterImage(String sql, SQLUndoLog sqlUndoLog, Connection connection) throws SQLException
     {
         if(sqlUndoLog.getBeforeImage().getRows().size() == 0)
+        {
             sqlUndoLog.setBeforeImage(null);
+            sqlUndoLog.setAfterImage(null);
+        }
         else sqlUndoLog.setAfterImage(TableData.buildTableData(getAfterResultSet(sqlUndoLog, connection), sqlUndoLog.getCurrTablePrimaryKey()));
     }
 
