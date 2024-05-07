@@ -44,7 +44,7 @@ public class SQLInterceptor implements Interceptor
         try(Connection connection = ((MappedStatement) invocation.getArgs()[0]).getConfiguration().getEnvironment().getDataSource().getConnection())
         {
             AbstractUndoExecutor undoExecutor = UndoExecutorFactory.getUndoExecutor(((MappedStatement) invocation.getArgs()[0]).getSqlCommandType());
-            log.info("SQL:==> {}", sql);
+            log.debug("SQL:==> {}", sql);
 
             // 初始化undoLog对象并绑定前置镜像
             GTContext.setSQLUndoLog(undoExecutor.buildSQLUndoLog(sql, connection, getTableName(sql)));

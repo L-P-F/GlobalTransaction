@@ -20,12 +20,13 @@ import java.util.stream.Collectors;
  */
 public class UndoDeleteExecutor extends AbstractUndoExecutor
 {
+    private static final SqlCommandType DELETE = SqlCommandType.DELETE;
     private static final String INSERT_SQL = "INSERT INTO %s (%s) VALUES (%s)";
 
     @Override
     public SQLUndoLog buildSQLUndoLog(String sql, Connection connection, String tableName) throws SQLException
     {
-        return SQLUndoLog.buildSQLUndoLog(getResultSet(sql, connection), SqlCommandType.DELETE, getPrimaryKey(tableName, connection));
+        return SQLUndoLog.buildSQLUndoLog(getResultSet(sql, connection), DELETE, getPrimaryKey(tableName, connection));
     }
 
     @Override

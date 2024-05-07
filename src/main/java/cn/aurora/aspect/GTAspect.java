@@ -88,8 +88,7 @@ public class GTAspect
     @AfterThrowing(pointcut = "GTCut()", throwing = "e")
     public void GTException(Throwable e)
     {
-        log.error("事务异常: {},隶属于全局事务: {},在全局事务中处于第{}位", e.getMessage(), GTContext.getXid(), GTContext.getBT().getExecuteOrder());
-        log.error("开始向服务器推送【回滚】请求");
+        log.error("事务异常: {},隶属于全局事务: {},在全局事务中处于第{}位,开始向服务器推送【回滚】请求", e.getMessage(), GTContext.getXid(), GTContext.getBT().getExecuteOrder());
         if (e instanceof SQLException || e instanceof DuplicateKeyException)
             GTCommitOrRollback(StatusEnum.FALSE, StatusEnum.SQL_EXCEPTION);
         else GTCommitOrRollback(StatusEnum.FALSE, StatusEnum.SERVER_EXCEPTION);
@@ -99,8 +98,7 @@ public class GTAspect
     @AfterThrowing(pointcut = "BTCut()", throwing = "e")
     public void BTException(Throwable e)
     {
-        log.error("事务异常: {},隶属于全局事务: {},在全局事务中处于第{}位", e.getMessage(), GTContext.getXid(), GTContext.getBT().getExecuteOrder());
-        log.error("开始向服务器推送【回滚】请求");
+        log.error("事务异常: {},隶属于全局事务: {},在全局事务中处于第{}位,开始向服务器推送【回滚】请求", e.getMessage(), GTContext.getXid(), GTContext.getBT().getExecuteOrder());
         if (e instanceof SQLException || e instanceof  DuplicateKeyException)
             BTCommitOrRollback(StatusEnum.FALSE, StatusEnum.SQL_EXCEPTION);
         else BTCommitOrRollback(StatusEnum.FALSE, StatusEnum.SERVER_EXCEPTION);
