@@ -97,7 +97,7 @@ public class UndoInsertExecutor extends AbstractUndoExecutor
     private ResultSet getResultSet(String sql, Connection connection) throws SQLException
     {
         // 使用正则表达式提取INSERT语句中的表名、插入的列和值
-        Pattern pattern = Pattern.compile("^INSERT\\s+INTO\\s+(\\w+)\\s*\\(([^)]+)\\)\\s+VALUES\\s*\\(([^)]+)\\)(?:\\s*,\\s*\\(([^)]+)\\))*$");
+        Pattern pattern = Pattern.compile("^INSERT\\s+INTO\\s+(\\w+)\\s*\\(([^)]+)\\)\\s+VALUES\\s*(\\(([^)]+)\\)(?:\\s*,\\s*\\(([^)]+)\\))*)$");
         Matcher matcher = pattern.matcher(sql);
         if (matcher.find())
         {
