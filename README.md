@@ -11,7 +11,7 @@
 [压缩包下载](https://github.com/L-P-F/GlobalTransaction/releases/tag/dependency)
 ```xml
 <dependency>
-    <groupId>cn.distributed</groupId>
+    <groupId>cn.aurora</groupId>
     <artifactId>ara-distribute-transaction-client</artifactId>
     <version>2.0</version>
 </dependency>
