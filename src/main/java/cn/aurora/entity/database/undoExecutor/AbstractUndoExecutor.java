@@ -37,7 +37,16 @@ public abstract class AbstractUndoExecutor
         {
             case INSERT, UPDATE ->
             {
-                TableData currImage = TableData.buildTableData(getCurrResultSet(sqlUndoLog, connection), sqlUndoLog.getCurrTablePrimaryKey());
+                // 考虑到由于多个参与统一全局事务的节点可能会多次修改同一条数据导致回滚时会出现镜像不匹配问题
+                // 设置获取镜像的重试机制,最长150ms,如果150ms过后获取到的镜像仍然与当前镜像不同,才认为真的是被不合法篡改。
+                long time = System.currentTimeMillis() + 150;
+                TableData currImage = null;
+                while (System.currentTimeMillis() <= time)
+                {
+                    currImage = TableData.buildTableData(getCurrResultSet(sqlUndoLog, connection), sqlUndoLog.getCurrTablePrimaryKey());
+                    if (currImage.equals(sqlUndoLog.getAfterImage()))
+                        break;
+                }
                 if (!sqlUndoLog.getAfterImage().equals(currImage))
                     throw new RuntimeException("出现不可控异常,数据库信息被非当前事务篡改,请人工处理!\n" +
                             "回滚操作时的数据本应为" + sqlUndoLog.getAfterImage() + "但是实际为" + currImage);
@@ -49,7 +58,7 @@ public abstract class AbstractUndoExecutor
         switch (sqlUndoLog.getSqlCommandType())
         {
             case INSERT -> undoSQL = buildUndoSQL(sqlUndoLog.getAfterImage());
-            case UPDATE,DELETE -> undoSQL = buildUndoSQL(sqlUndoLog.getBeforeImage());
+            case UPDATE, DELETE -> undoSQL = buildUndoSQL(sqlUndoLog.getBeforeImage());
         }
 
 

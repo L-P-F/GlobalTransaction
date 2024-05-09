@@ -109,7 +109,8 @@ public class SocketClient
             }
         }
         log.warn("{} | {} 号分支事务" + (commitOrRollback ? "【提交】" : "【回滚】") + "成功", bt.getXid(), bt.getExecuteOrder());
-        log.warn("全局事务 {}" + (commitOrRollback ? "【提交】" : "【回滚】") + "成功,与服务器断开连接", bt.getXid());
+        if (bt.getExecuteOrder() == 1)
+            log.warn("全局事务 {}" + (commitOrRollback ? "【提交】" : "【回滚】") + "成功,与服务器断开连接", bt.getXid());
     }
 
     private void connectToServer(BT bt, String executeStatus, DataSource dataSource, List<SQLUndoLog> sqlUndoLogs, StatusEnum exceptionEnum)
