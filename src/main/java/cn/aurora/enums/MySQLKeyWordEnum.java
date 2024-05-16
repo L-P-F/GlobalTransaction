@@ -5,10 +5,10 @@ import lombok.Getter;
 /**
  * 2024-05-01 16:52
  * <p>Author: Aurora-LPF</p>
- * <p>mysql数据库中的关键字</p>
+ * <p>MySQL数据库中的关键字</p>
  */
 @Getter
-public enum MySQLKeyWord
+public enum MySQLKeyWordEnum
 {
     /**
      * ACCESSIBLE is mysql keyword.
@@ -1067,14 +1067,14 @@ public enum MySQLKeyWord
      */
     public final String name;
 
-    MySQLKeyWord(String name)
+    MySQLKeyWordEnum(String name)
     {
         this.name = name;
     }
 
     public static Boolean isKeyWord(String word)
     {
-        for (MySQLKeyWord value : MySQLKeyWord.values())
+        for (MySQLKeyWordEnum value : MySQLKeyWordEnum.values())
             if(value.getName().equals(word.toUpperCase()))
                 return true;
         return false;

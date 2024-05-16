@@ -21,7 +21,9 @@
 </dependency>
 ```
 
-## 2.XA模式的工具需要自己注册一个拦截器(由于作者偷懒,没做更改)
+## 2.XA模式的工具需要自己注册一个拦截器
+
+>AT模式的拦截器已经被集成到依赖中了,不需要使用者自己注册,但是XA模式作者太懒,没改^_^
 
 在项目中参加全局事务的分支节点内注册拦截器,全局事务入口所在节点不需要注册(除非该节点也需要作为某个全局事务的分支节点)
 
@@ -45,14 +47,22 @@ public class InterceptorConfig extends WebMvcConfigurationSupport
 
 ## 3.在serviceImpl层全局事务入口处的方法上添加@GlobalTransaction注解
 
-## 4.在分支节点的serviceImpl层中需要参与全局事务的方法上添加@BranchTransaction注解
+## 4.在分支节点的serviceImpl层中需要参与全局事务的入口方法上添加@BranchTransaction注解
+>GT和BT注解只需要添加一个即可
+
+```text
+比如一条全局事务链 A(节点1下的a方法) -> B(节点1下的b方法) -> C(节点2下的a方法) -> D(节点2下的b方法)
+此时A作为全局事务入口,在方法内部调用B,通过feign远程请求C,C再在方法内调用D
+我们只需要在 A 上添加 GT 注解,在 C 上添加 BT 注解即可。
+除非B和D也需要作为其他全局事务链的 【成员】 或 【入口】 ,否则不需要添加相应的注解
+```
 
 ------
 
 **@GloabalTransaction和@BranchTransaction注解和Transactional注解一样，都有管理基本本地事务的能力;**
 
 
->XA模式下;
+>XA模式下
 
 假设A节点下有两个serviceImpl，我们可以通过@GT或者@BT注解与原生的@Transactional(propagation = Propagation.REQUIRES_NEW)注解联合使用实现**更改事务的传播机制**。
 
@@ -94,4 +104,3 @@ public class UserServiceImpl implements UserService{
 ## 5.运行GTServer服务器
 
 [GTServer-2.0.zip下载路径](https://github.com/L-P-F/GlobalTransaction-Server/releases/tag/GTServer)
-

@@ -1,6 +1,6 @@
 package cn.aurora.entity.database.entity;
 
-import cn.aurora.util.CircumventionKeyWord;
+import cn.aurora.util.CircumventionKeyWordUtil;
 import lombok.Data;
 
 import javax.sql.rowset.serial.*;
@@ -44,7 +44,7 @@ public class TableData
             for (int i = 1; i <= columnCount; i++)
             {
                 Field field = new Field();
-                String columnName = CircumventionKeyWord.Convert(metaData.getColumnName(i));
+                String columnName = CircumventionKeyWordUtil.Convert(metaData.getColumnName(i));
 
 
                 if (columnName.equals(primaryKey))
