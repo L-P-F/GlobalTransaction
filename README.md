@@ -21,7 +21,7 @@
 </dependency>
 ```
 
-## 2.注册拦截器
+## 2.XA模式的工具需要自己注册一个拦截器(由于作者偷懒,没做更改)
 
 在项目中参加全局事务的分支节点内注册拦截器,全局事务入口所在节点不需要注册(除非该节点也需要作为某个全局事务的分支节点)
 
@@ -51,8 +51,10 @@ public class InterceptorConfig extends WebMvcConfigurationSupport
 
 **@GloabalTransaction和@BranchTransaction注解和Transactional注解一样，都有管理基本本地事务的能力;**
 
-假设A节点下有两个serviceImpl，
-我们可以通过@GT或者@BT注解与原生的@Transactional(propagation = Propagation.REQUIRES_NEW)注解联合使用实现**更改事务的传播机制**。
+
+>XA模式下;
+
+假设A节点下有两个serviceImpl，我们可以通过@GT或者@BT注解与原生的@Transactional(propagation = Propagation.REQUIRES_NEW)注解联合使用实现**更改事务的传播机制**。
 
 >示例如下
 
@@ -83,9 +85,11 @@ public class UserServiceImpl implements UserService{
 ```
 
 **但是@GT和@BT两个注解本身并没有设计Propagation参数去改变事务的传播机制**
+<p style="color:cyan">PS:因为作者也有点懒了QAQ,后续有时间再考虑实现吧</p>
+
+>**注意**
 
 <p style="font-style: italic; color:indianred">本工具不能很好的支持mybatis-plus封装的批处理操作比如"saveBatch,updateBatch"等方法,因此建议批处理操作使用mybatis的动态sql进行完成
-<p style="color:cyan">PS:因为作者也有点懒了QAQ,后续有时间再考虑实现吧</p>
 
 ## 5.运行GTServer服务器
 
