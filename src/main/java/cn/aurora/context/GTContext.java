@@ -3,6 +3,7 @@ package cn.aurora.context;
 import cn.aurora.entity.BT;
 import cn.aurora.entity.database.SQLUndoLog;
 import cn.aurora.enums.StatusEnum;
+import org.springframework.transaction.TransactionStatus;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -97,8 +98,8 @@ public class GTContext
     /**
      * 普通本地事务初始化
      */
-    public static void CTInit()
+    public static void CTInit(TransactionStatus status)
     {
-        setBT(BT.builder().build());
+        setBT(BT.builder().transactionStatus(status).build());
     }
 }

@@ -11,7 +11,7 @@ import org.springframework.web.servlet.HandlerInterceptor;
  * <p>Author: Aurora-LPF</p>
  * <p>拦截发送进来的feign请求,拦截器需要用户在自己的项目中注册,拦截所有路径即可</p>
  */
-public class GTFeignReqReceive implements HandlerInterceptor
+public class GTFeignReqReceiveInterceptor implements HandlerInterceptor
 {
     @Override
     public boolean preHandle(HttpServletRequest req, HttpServletResponse res, Object o)

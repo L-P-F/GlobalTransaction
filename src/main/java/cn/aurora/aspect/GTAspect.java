@@ -15,9 +15,13 @@ import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.dao.DuplicateKeyException;
+import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.support.DefaultTransactionDefinition;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.sql.DataSource;
 import java.sql.SQLException;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -32,6 +36,9 @@ public class GTAspect
 {
     @Autowired
     private DataSource dataSource;
+
+    @Autowired
+    private TransactionTemplate transactionTemplate;
 
     @Pointcut("@annotation(cn.aurora.anno.GlobalTransaction)")
     public void GTCut()
@@ -74,13 +81,19 @@ public class GTAspect
             HTTPUtil.saveBranch(xid);
             log.info("分支事务开启,方法名: {}，隶属于全局事务: {},执行顺序: {}", ms.getMethod().getName(), xid, GTContext.getBT().getExecuteOrder());
         } else
-            GTContext.CTInit();
+        {
+            DefaultTransactionDefinition definition = new DefaultTransactionDefinition();
+            TransactionStatus status = Objects.requireNonNull(transactionTemplate.getTransactionManager()).getTransaction(definition);
+            GTContext.CTInit(status);
+        }
 
         Object result = point.proceed();
 
         if (xid != null)
             //异步对接服务器,等待服务器通知commit OR rollback
             BTCommitOrRollback(StatusEnum.TRUE, StatusEnum.NONE_EXCEPTION);
+        else
+            transactionTemplate.getTransactionManager().commit(GTContext.getBT().getTransactionStatus());
 
         return result;
     }
@@ -98,6 +111,11 @@ public class GTAspect
     @AfterThrowing(pointcut = "BTCut()", throwing = "e")
     public void BTException(Throwable e)
     {
+        if (GTContext.getXid() == null)
+        {
+            Objects.requireNonNull(transactionTemplate.getTransactionManager()).rollback(GTContext.getBT().getTransactionStatus());
+            return;
+        }
         log.error("事务异常: {},隶属于全局事务: {},在全局事务中处于第{}位,开始向服务器推送【回滚】请求", e.getMessage(), GTContext.getXid(), GTContext.getBT().getExecuteOrder());
         if (e instanceof SQLException || e instanceof DuplicateKeyException)
             BTCommitOrRollback(StatusEnum.FALSE, StatusEnum.SQL_EXCEPTION);

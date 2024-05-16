@@ -1,14 +1,17 @@
 package cn.aurora.config;
 
 import cn.aurora.aspect.GTAspect;
-import cn.aurora.interceptor.GTFeignReqReceive;
-import cn.aurora.interceptor.GTFeignReqSend;
+import cn.aurora.interceptor.GTFeignReqReceiveInterceptor;
+import cn.aurora.interceptor.GTFeignReqSendInterceptor;
 import cn.aurora.interceptor.SQLInterceptor;
 import cn.aurora.properties.GTConfigurationProperties;
 import cn.aurora.until.CommonUtil;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.jdbc.datasource.DataSourceTransactionManager;
+import org.springframework.transaction.support.TransactionTemplate;
 
 /**
  * 2024-04-18 13:28
@@ -20,15 +23,15 @@ import org.springframework.context.annotation.Configuration;
 public class GTBeansAutoConfigure
 {
     @Bean
-    protected GTFeignReqSend feignReqSend()
+    protected GTFeignReqSendInterceptor feignReqSend()
     {
-        return new GTFeignReqSend();
+        return new GTFeignReqSendInterceptor();
     }
 
     @Bean
-    public GTFeignReqReceive feignReqReceive()
+    public GTFeignReqReceiveInterceptor feignReqReceive()
     {
-        return new GTFeignReqReceive();
+        return new GTFeignReqReceiveInterceptor();
     }
 
     @Bean
@@ -47,5 +50,12 @@ public class GTBeansAutoConfigure
     public CommonUtil commonUtil(GTConfigurationProperties gtConfigurationProperties)
     {
         return new CommonUtil(gtConfigurationProperties);
+    }
+
+    @Bean
+    @ConditionalOnBean(DataSourceTransactionManager.class)
+    public TransactionTemplate transactionTemplate(DataSourceTransactionManager dataSourceTransactionManager)
+    {
+        return new TransactionTemplate(dataSourceTransactionManager);
     }
 }
