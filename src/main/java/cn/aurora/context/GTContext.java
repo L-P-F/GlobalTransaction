@@ -17,7 +17,7 @@ public class GTContext
 {
     private static final ThreadLocal<BT> CURRENT_BT = new ThreadLocal<>();
     private static final ThreadLocal<String> XID = new ThreadLocal<>();
-    private static final ThreadLocal<AtomicBoolean> WHETHER_FIRST_SEND = new ThreadLocal<>();
+    private static final ThreadLocal<AtomicBoolean> WHETHER_FIRST_EXECUTE = ThreadLocal.withInitial(() -> new AtomicBoolean(true));
     private static final ThreadLocal<List<SQLUndoLog>> SQL_UNDO_LOG = new ThreadLocal<>();
 
     public static void setXid(String xid)
@@ -40,14 +40,9 @@ public class GTContext
         return CURRENT_BT.get();
     }
 
-    public static void setWhetherFirstSend(AtomicBoolean firstSend)
+    public static AtomicBoolean getWhetherFirstExecute()
     {
-        WHETHER_FIRST_SEND.set(firstSend);
-    }
-
-    public static AtomicBoolean getWhetherFirstSend()
-    {
-        return WHETHER_FIRST_SEND.get();
+        return WHETHER_FIRST_EXECUTE.get();
     }
 
     public static void setSQLUndoLog(SQLUndoLog sqlUndoLog)
@@ -71,7 +66,7 @@ public class GTContext
     {
         CURRENT_BT.remove();
         XID.remove();
-        WHETHER_FIRST_SEND.remove();
+        WHETHER_FIRST_EXECUTE.remove();
         SQL_UNDO_LOG.remove();
     }
 

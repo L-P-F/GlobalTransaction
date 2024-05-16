@@ -23,7 +23,6 @@ import javax.sql.DataSource;
 import java.sql.SQLException;
 import java.util.Objects;
 import java.util.UUID;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * 2024-04-17 14:35
@@ -53,12 +52,14 @@ public class GTAspect
     @Around("GTCut()") //本身也是一个分支事务
     public Object GTStart(ProceedingJoinPoint point) throws Throwable
     {
-        GTContext.setWhetherFirstSend(new AtomicBoolean(true));
+        if (!GTContext.getWhetherFirstExecute().compareAndSet(true, false))
+            return point.proceed();
+        else if (GTContext.getXid() != null)
+            return BTStart(point);
 
         String xid = UUID.randomUUID().toString();
         GTContext.GTInit(xid);
-        if (GTContext.getWhetherFirstSend().compareAndSet(true, false))
-            HTTPUtil.saveBranch(xid);//判断是否已经注册过，注册过就不在发送注册请求
+        HTTPUtil.saveBranch(xid);
         log.info("开始全局事务,xid: {},执行顺序: {}", xid, GTContext.getBT().getExecuteOrder());
 
         Object result = point.proceed();
