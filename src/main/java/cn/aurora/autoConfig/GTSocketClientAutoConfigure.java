@@ -1,4 +1,4 @@
-package cn.aurora.config;
+package cn.aurora.autoConfig;
 
 import cn.aurora.rpc.SocketClient;
 import org.springframework.context.annotation.Bean;

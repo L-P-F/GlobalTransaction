@@ -1,7 +1,6 @@
 package cn.aurora.config;
 
 import cn.aurora.interceptor.GTFeignReqReceiveInterceptor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
@@ -12,8 +11,12 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
  */
 public class InterceptorConfigure implements WebMvcConfigurer
 {
-    @Autowired
-    private GTFeignReqReceiveInterceptor feignReqReceiveInterceptor;
+    private final GTFeignReqReceiveInterceptor feignReqReceiveInterceptor;
+
+    public InterceptorConfigure(GTFeignReqReceiveInterceptor feignReqReceiveInterceptor)
+    {
+        this.feignReqReceiveInterceptor = feignReqReceiveInterceptor;
+    }
 
     @Override
     public void addInterceptors(InterceptorRegistry registry)

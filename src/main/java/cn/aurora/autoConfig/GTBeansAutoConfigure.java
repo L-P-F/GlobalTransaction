@@ -1,6 +1,7 @@
-package cn.aurora.config;
+package cn.aurora.autoConfig;
 
 import cn.aurora.aspect.GTAspect;
+import cn.aurora.config.InterceptorConfigure;
 import cn.aurora.interceptor.GTFeignReqReceiveInterceptor;
 import cn.aurora.interceptor.GTFeignReqSendInterceptor;
 import cn.aurora.interceptor.SQLInterceptor;
@@ -60,8 +61,8 @@ public class GTBeansAutoConfigure
     }
 
     @Bean
-    public InterceptorConfigure interceptor()
+    public InterceptorConfigure interceptor(GTFeignReqReceiveInterceptor feignReqReceiveInterceptor)
     {
-        return new InterceptorConfigure();
+        return new InterceptorConfigure(feignReqReceiveInterceptor);
     }
 }

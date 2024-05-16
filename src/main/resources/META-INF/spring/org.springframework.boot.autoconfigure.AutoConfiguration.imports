@@ -1,2 +1,2 @@
-cn.aurora.config.GTBeansAutoConfigure
-cn.aurora.config.GTSocketClientAutoConfigure
+cn.aurora.autoConfig.GTBeansAutoConfigure
+cn.aurora.autoConfig.GTSocketClientAutoConfigure

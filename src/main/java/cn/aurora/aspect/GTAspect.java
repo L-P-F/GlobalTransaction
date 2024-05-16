@@ -1,6 +1,6 @@
 package cn.aurora.aspect;
 
-import cn.aurora.config.GTSocketClientAutoConfigure;
+import cn.aurora.autoConfig.GTSocketClientAutoConfigure;
 import cn.aurora.context.GTContext;
 import cn.aurora.enums.StatusEnum;
 import cn.aurora.rpc.HTTPUtil;
