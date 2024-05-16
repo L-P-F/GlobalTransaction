@@ -52,10 +52,10 @@ public class GTAspect
     @Around("GTCut()") //本身也是一个分支事务
     public Object GTStart(ProceedingJoinPoint point) throws Throwable
     {
-        if (!GTContext.getWhetherFirstExecute().compareAndSet(true, false))
-            return point.proceed();
-        else if (GTContext.getXid() != null)
-            return BTStart(point);
+        if (!GTContext.getWhetherFirstExecute().compareAndSet(true, false)) // 判断当前线程是否是第一次执行带有GT注解的方法
+            return point.proceed(); // 不是 | 说明全局事务已经开启,直接执行,不进行增强
+        else if (GTContext.getXid() != null) // 判断xid是否存在
+            return BTStart(point); // 存在 | 说明本次调用属于被其他开启GT的方法进行远程调用,直接降级为BT参与到全局事务中
 
         String xid = UUID.randomUUID().toString();
         GTContext.GTInit(xid);
