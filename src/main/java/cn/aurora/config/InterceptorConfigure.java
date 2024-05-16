@@ -4,10 +4,10 @@ import cn.aurora.interceptor.GTFeignReqReceiveInterceptor;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
-/*
+/**
  * 2024-05-16 19:46
- * Author: Aurora
- * 注入http请求拦截器
+ * <p> Author: Aurora </p>
+ * http请求拦截器
  */
 public class InterceptorConfigure implements WebMvcConfigurer
 {
