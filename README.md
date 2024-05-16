@@ -23,7 +23,7 @@
 
 ## 2.XA模式的工具需要自己注册一个拦截器
 
->AT模式的拦截器已经被集成到依赖中了,不需要使用者自己注册,但是XA模式作者太懒,没改^_^
+>AT模式的拦截器已经被集成到依赖中了,不需要使用者自己注册,但是XA模式作者太懒,没改^_^,而且XA模式效率和安全性远低于AT模式,所以不建议使用
 
 在项目中参加全局事务的分支节点内注册拦截器,全局事务入口所在节点不需要注册(除非该节点也需要作为某个全局事务的分支节点)
 
@@ -43,6 +43,14 @@ public class InterceptorConfig extends WebMvcConfigurationSupport
                 .addPathPatterns("/**");
     }
 }
+```
+## 2.AT模式在项目application.yml中配置服务器运行端口以及数据库中回滚表的名字
+不配置会使用默认值
+```yaml
+gt:
+  server:
+    undo-table-name: table_name
+    server-addr: ip:port
 ```
 
 ## 3.在serviceImpl层全局事务入口处的方法上添加@GlobalTransaction注解
