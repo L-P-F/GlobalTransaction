@@ -9,7 +9,7 @@ import lombok.Getter;
 @Getter
 public enum ParamsEnum
 {
-    XID("xid", "全局事务ID");
+    XID("CN.Aurora.GlobalTransaction.Xid", "全局事务ID");
     private final String value;
     private final String content;
 
