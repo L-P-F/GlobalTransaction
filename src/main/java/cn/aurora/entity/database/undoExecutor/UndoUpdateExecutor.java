@@ -4,7 +4,7 @@ import cn.aurora.entity.database.entity.SQLUndoLog;
 import cn.aurora.entity.database.entity.Field;
 import cn.aurora.entity.database.entity.Row;
 import cn.aurora.entity.database.entity.TableData;
-import cn.aurora.until.CommonUtil;
+import cn.aurora.util.CommonUtil;
 import org.apache.ibatis.mapping.SqlCommandType;
 
 import java.sql.Connection;

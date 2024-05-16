@@ -1,4 +1,4 @@
-package cn.aurora.until;
+package cn.aurora.util;
 
 import java.io.Serializable;
 import java.sql.Array;

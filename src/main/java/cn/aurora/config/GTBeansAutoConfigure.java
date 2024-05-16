@@ -5,7 +5,7 @@ import cn.aurora.interceptor.GTFeignReqReceiveInterceptor;
 import cn.aurora.interceptor.GTFeignReqSendInterceptor;
 import cn.aurora.interceptor.SQLInterceptor;
 import cn.aurora.properties.GTConfigurationProperties;
-import cn.aurora.until.CommonUtil;
+import cn.aurora.util.CommonUtil;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -57,5 +57,11 @@ public class GTBeansAutoConfigure
     public TransactionTemplate transactionTemplate(DataSourceTransactionManager dataSourceTransactionManager)
     {
         return new TransactionTemplate(dataSourceTransactionManager);
+    }
+
+    @Bean
+    public InterceptorConfigure interceptor()
+    {
+        return new InterceptorConfigure();
     }
 }

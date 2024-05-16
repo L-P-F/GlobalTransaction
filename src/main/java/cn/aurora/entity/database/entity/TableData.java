@@ -1,6 +1,6 @@
 package cn.aurora.entity.database.entity;
 
-import cn.aurora.until.CircumventionKeyWord;
+import cn.aurora.util.CircumventionKeyWord;
 import lombok.Data;
 
 import javax.sql.rowset.serial.*;

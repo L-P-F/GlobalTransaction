@@ -3,7 +3,7 @@ package cn.aurora.rpc;
 import cn.aurora.context.GTContext;
 import cn.aurora.entity.Result;
 import cn.aurora.enums.ReqPathEnum;
-import cn.aurora.until.CommonUtil;
+import cn.aurora.util.CommonUtil;
 import com.alibaba.fastjson.JSON;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpEntity;

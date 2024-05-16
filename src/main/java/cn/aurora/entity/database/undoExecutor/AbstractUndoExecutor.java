@@ -5,7 +5,7 @@ import cn.aurora.entity.database.entity.Field;
 import cn.aurora.entity.database.entity.KeyType;
 import cn.aurora.entity.database.entity.Row;
 import cn.aurora.entity.database.entity.TableData;
-import cn.aurora.until.SerialArray;
+import cn.aurora.util.SerialArray;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.sql.rowset.serial.SerialBlob;
