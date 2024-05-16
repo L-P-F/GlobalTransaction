@@ -1,5 +1,6 @@
 package cn.aurora.rpc;
 
+import cn.aurora.context.GTContext;
 import cn.aurora.entity.BT;
 import cn.aurora.entity.database.entity.SQLUndoLog;
 import cn.aurora.entity.database.UndoExecutorFactory;
@@ -132,7 +133,7 @@ public class SocketClient
             judgeMessage(bt, dataSource, sqlUndoLogs, exceptionEnum);
         } catch (URISyntaxException | DeploymentException | IOException e)
         {
-            log.error("连接GT服务器出现异常: {},已控制所有事务【回滚】,请检查是否已经成功启动【GT-server】", e.getMessage());
+            log.error("隶属于全局事务{} | 【连接GT服务器出现异常】: {},已控制当前分支事务【回滚】,请检查是否已经成功启动【GT-server】", GTContext.getXid(), e.getMessage());
             latestMessage = StatusEnum.FALSE.getMsg();
             judgeMessage(bt, dataSource, sqlUndoLogs, exceptionEnum);
         }

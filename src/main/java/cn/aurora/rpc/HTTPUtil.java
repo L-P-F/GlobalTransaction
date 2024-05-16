@@ -24,7 +24,7 @@ import java.io.IOException;
 @Slf4j
 public class HTTPUtil
 {
-    public static void saveBranch(String xid)
+    public static void saveBranch(String xid) throws IOException
     {
         String jsonBody = JSON.toJSONString(GTContext.getBT());
         log.debug("注册分支事务请求体: {}", jsonBody);
@@ -46,7 +46,8 @@ public class HTTPUtil
             }
         } catch (IOException e)
         {
-            log.error("注册出错: {},本次事务已【回滚】,请检查是否成功启动【GT-server】", e.getMessage());
+            log.error("隶属于全局事务 {} | 【注册出错】: {},本次事务【未执行】,请检查是否成功启动【GT-server】", GTContext.getXid(), e.getMessage());
+            throw e;
         }
     }
 }
