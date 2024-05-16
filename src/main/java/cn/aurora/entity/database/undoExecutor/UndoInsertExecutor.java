@@ -1,6 +1,6 @@
 package cn.aurora.entity.database.undoExecutor;
 
-import cn.aurora.entity.database.SQLUndoLog;
+import cn.aurora.entity.database.entity.SQLUndoLog;
 import cn.aurora.entity.database.entity.Field;
 import cn.aurora.entity.database.entity.KeyType;
 import cn.aurora.entity.database.entity.Row;

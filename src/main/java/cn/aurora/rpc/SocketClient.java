@@ -1,7 +1,7 @@
 package cn.aurora.rpc;
 
 import cn.aurora.entity.BT;
-import cn.aurora.entity.database.SQLUndoLog;
+import cn.aurora.entity.database.entity.SQLUndoLog;
 import cn.aurora.entity.database.UndoExecutorFactory;
 import cn.aurora.entity.database.undoExecutor.AbstractUndoExecutor;
 import cn.aurora.enums.ReqPathEnum;

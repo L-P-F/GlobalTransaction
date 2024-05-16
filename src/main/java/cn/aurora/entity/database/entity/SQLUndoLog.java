@@ -1,6 +1,5 @@
-package cn.aurora.entity.database;
+package cn.aurora.entity.database.entity;
 
-import cn.aurora.entity.database.entity.TableData;
 import lombok.Data;
 import org.apache.ibatis.mapping.SqlCommandType;
 

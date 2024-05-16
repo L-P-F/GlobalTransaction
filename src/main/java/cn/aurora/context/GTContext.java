@@ -1,7 +1,7 @@
 package cn.aurora.context;
 
 import cn.aurora.entity.BT;
-import cn.aurora.entity.database.SQLUndoLog;
+import cn.aurora.entity.database.entity.SQLUndoLog;
 import cn.aurora.enums.StatusEnum;
 import org.springframework.transaction.TransactionStatus;
 
