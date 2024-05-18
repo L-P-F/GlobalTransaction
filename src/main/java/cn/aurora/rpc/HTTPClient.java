@@ -22,7 +22,7 @@ import java.io.IOException;
  * <p>Author: Aurora-LPF</p>
  */
 @Slf4j
-public class HTTPUtil
+public class HTTPClient
 {
     public static void saveBranch(String xid) throws IOException
     {

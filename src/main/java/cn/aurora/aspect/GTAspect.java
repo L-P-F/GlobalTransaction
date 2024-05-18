@@ -3,7 +3,7 @@ package cn.aurora.aspect;
 import cn.aurora.autoConfig.GTSocketClientAutoConfigure;
 import cn.aurora.context.GTContext;
 import cn.aurora.enums.StatusEnum;
-import cn.aurora.rpc.HTTPUtil;
+import cn.aurora.rpc.HTTPClient;
 import cn.aurora.rpc.SocketClient;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -59,7 +59,7 @@ public class GTAspect
 
         String xid = UUID.randomUUID().toString();
         GTContext.GTInit(xid);
-        HTTPUtil.saveBranch(xid);
+        HTTPClient.saveBranch(xid);
         log.info("开始全局事务,xid: {},执行顺序: {}", xid, GTContext.getBT().getExecuteOrder());
 
         Object result = point.proceed();
@@ -79,7 +79,7 @@ public class GTAspect
         {
             MethodSignature ms = (MethodSignature) point.getSignature();
             GTContext.BTInit(xid);
-            HTTPUtil.saveBranch(xid);
+            HTTPClient.saveBranch(xid);
             log.info("分支事务开启,方法名: {}，隶属于全局事务: {},执行顺序: {}", ms.getMethod().getName(), xid, GTContext.getBT().getExecuteOrder());
         } else
         {
@@ -95,6 +95,7 @@ public class GTAspect
             BTCommitOrRollback(StatusEnum.TRUE, StatusEnum.NONE_EXCEPTION);
         else
             transactionTemplate.getTransactionManager().commit(GTContext.getBT().getTransactionStatus());
+        GTContext.clear(); //防止内存泄漏
 
         return result;
     }
@@ -121,6 +122,7 @@ public class GTAspect
         if (e instanceof SQLException || e instanceof DuplicateKeyException)
             BTCommitOrRollback(StatusEnum.FALSE, StatusEnum.SQL_EXCEPTION);
         else BTCommitOrRollback(StatusEnum.FALSE, StatusEnum.SERVER_EXCEPTION);
+        GTContext.clear(); //防止内存泄漏
     }
 
 
