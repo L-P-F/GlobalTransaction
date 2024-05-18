@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
 /**
  * 2024-04-17 16:10
  * <p>Author: Aurora-LPF</p>
@@ -41,13 +42,14 @@ public class SQLInterceptor implements Interceptor
         String sql = resolveSqlWithParameters(invocation);
 
         //try-with-resource进行执行,可以自动释放connection连接,不需要手动close
-        try(Connection connection = ((MappedStatement) invocation.getArgs()[0]).getConfiguration().getEnvironment().getDataSource().getConnection())
+        try (Connection connection = ((MappedStatement) invocation.getArgs()[0]).getConfiguration().getEnvironment().getDataSource().getConnection())
         {
             AbstractUndoExecutor undoExecutor = UndoExecutorFactory.getUndoExecutor(((MappedStatement) invocation.getArgs()[0]).getSqlCommandType());
             log.debug("SQL:==> {}", sql);
 
             // 初始化undoLog对象并绑定前置镜像
             GTContext.setSQLUndoLog(undoExecutor.buildSQLUndoLog(sql, connection, getTableName(sql)));
+
 
             Object result = invocation.proceed();
 

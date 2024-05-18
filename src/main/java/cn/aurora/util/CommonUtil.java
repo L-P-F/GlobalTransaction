@@ -15,11 +15,12 @@ import java.util.concurrent.atomic.AtomicBoolean;
 /**
  * 2024-05-03 12:10
  * <p>Author: Aurora-LPF</p>
+ * <p>工具包,进行数据的加锁和释放锁,判定是否开启刷盘功能,动态构建访问服务器的请求路径等</p>
  */
 @Data
 public class CommonUtil
 {
-    private static GTConfigurationProperties gtConfigurationProperties = null;
+    private static GTConfigurationProperties gtConfigurationProperties;
 
     public CommonUtil(GTConfigurationProperties gtConfigurationProperties)
     {
@@ -75,10 +76,9 @@ public class CommonUtil
 
     public static void releaseLock(String xid, Connection connection) throws SQLException
     {
-        StringBuilder delete = new StringBuilder("delete from ");
-        delete.append(gtConfigurationProperties.getUndoTableName())
-                .append(" where xid = '").append(xid).append("'");
-        try (PreparedStatement statement = connection.prepareStatement(delete.toString()))
+        String delete = "delete from " + gtConfigurationProperties.getUndoTableName() +
+                " where xid = '" + xid + "'";
+        try (PreparedStatement statement = connection.prepareStatement(delete))
         {
             statement.executeUpdate();
         }
