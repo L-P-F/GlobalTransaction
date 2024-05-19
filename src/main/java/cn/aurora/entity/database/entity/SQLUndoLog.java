@@ -24,6 +24,11 @@ public class SQLUndoLog
     private SqlCommandType sqlCommandType;
 
     /**
+     * 当前sql执行状态
+     */
+    private Boolean sqlExecStatus;
+
+    /**
      * 前置镜像
      */
     private TableData beforeImage;
@@ -41,6 +46,7 @@ public class SQLUndoLog
     {
         SQLUndoLog sqlUndoLog = new SQLUndoLog();
 
+        sqlUndoLog.setSqlExecStatus(false);
         sqlUndoLog.setSqlCommandType(sqlCommandType);
         sqlUndoLog.setCurrTablePrimaryKey(primaryKey);
         sqlUndoLog.setBeforeImage(TableData.buildTableData(resultSet, primaryKey));

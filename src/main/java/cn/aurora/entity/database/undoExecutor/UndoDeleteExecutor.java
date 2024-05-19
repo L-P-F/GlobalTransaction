@@ -38,7 +38,11 @@ public class UndoDeleteExecutor extends AbstractUndoExecutor
     {
         if(sqlUndoLog.getBeforeImage().getRows().size() == 0)
             sqlUndoLog.setBeforeImage(null);
-        sqlUndoLog.setAfterImage(null);
+        else
+        {
+            sqlUndoLog.setAfterImage(null);
+            sqlUndoLog.setSqlExecStatus(true); //把sql执行状态设置为true,表示已经执行过sql
+        }
     }
 
     /**

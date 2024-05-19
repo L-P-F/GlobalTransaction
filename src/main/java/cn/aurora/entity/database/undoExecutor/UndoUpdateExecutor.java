@@ -41,7 +41,11 @@ public class UndoUpdateExecutor extends AbstractUndoExecutor
             sqlUndoLog.setBeforeImage(null);
             sqlUndoLog.setAfterImage(null);
         }
-        else sqlUndoLog.setAfterImage(TableData.buildTableData(getAfterResultSet(sqlUndoLog, connection), sqlUndoLog.getCurrTablePrimaryKey()));
+        else
+        {
+            sqlUndoLog.setAfterImage(TableData.buildTableData(getAfterResultSet(sqlUndoLog, connection), sqlUndoLog.getCurrTablePrimaryKey()));
+            sqlUndoLog.setSqlExecStatus(true); //把sql执行状态设置为true,表示已经执行过sql
+        }
     }
 
     @Override

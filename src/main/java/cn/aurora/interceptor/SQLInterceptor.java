@@ -38,15 +38,14 @@ public class SQLInterceptor implements Interceptor
     public Object intercept(Invocation invocation) throws Throwable
     {
         if (GTContext.getXid() == null)
-            return invocation.proceed();//拦截开启全局事务以外调用的sql语句，直接放行，不做任何处理
+            return invocation.proceed(); //如果拦截到开启全局事务以外调用的sql语句,直接放行,不做任何处理
         String sql = resolveSqlWithParameters(invocation);
+        log.debug("SQL:==> {}", sql);
 
         //try-with-resource进行执行,可以自动释放connection连接,不需要手动close
         try (Connection connection = ((MappedStatement) invocation.getArgs()[0]).getConfiguration().getEnvironment().getDataSource().getConnection())
         {
             AbstractUndoExecutor undoExecutor = UndoExecutorFactory.getUndoExecutor(((MappedStatement) invocation.getArgs()[0]).getSqlCommandType());
-            log.debug("SQL:==> {}", sql);
-
             // 初始化undoLog对象并绑定前置镜像
             GTContext.setSQLUndoLog(undoExecutor.buildSQLUndoLog(sql, connection, getTableName(sql)));
 

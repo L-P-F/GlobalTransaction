@@ -63,6 +63,7 @@ public class UndoInsertExecutor extends AbstractUndoExecutor
         afterImage.setRows(rows);
         afterImage.setPrimaryKeyValues(afterPrimaryKeyValues);
         sqlUndoLog.setAfterImage(afterImage);
+        sqlUndoLog.setSqlExecStatus(true); //把sql执行状态设置为true,表示已经执行过sql
     }
 
     @Override

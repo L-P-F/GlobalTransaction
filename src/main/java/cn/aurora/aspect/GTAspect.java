@@ -14,13 +14,11 @@ import org.aspectj.lang.annotation.Pointcut;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
-import org.springframework.dao.DuplicateKeyException;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.sql.DataSource;
-import java.sql.SQLException;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -65,7 +63,7 @@ public class GTAspect
         Object result = point.proceed();
 
         //同步对接服务器,等待服务器通知commit OR rollback
-        GTCommitOrRollback(StatusEnum.TRUE, StatusEnum.NONE_EXCEPTION);
+        GTCommitOrRollback(StatusEnum.TRUE);
         GTContext.clear();//防止内存泄漏
 
         return result;
@@ -92,7 +90,7 @@ public class GTAspect
 
         if (xid != null)
             //异步对接服务器,等待服务器通知commit OR rollback
-            BTCommitOrRollback(StatusEnum.TRUE, StatusEnum.NONE_EXCEPTION);
+            BTCommitOrRollback(StatusEnum.TRUE);
         else
             transactionTemplate.getTransactionManager().commit(GTContext.getBT().getTransactionStatus());
         GTContext.clear(); //防止内存泄漏
@@ -104,9 +102,7 @@ public class GTAspect
     public void GTException(Throwable e)
     {
         log.error("事务异常: {},隶属于全局事务: {},在全局事务中处于第{}位,开始向服务器推送【回滚】请求", e.getMessage(), GTContext.getXid(), GTContext.getBT().getExecuteOrder());
-        if (e instanceof SQLException || e instanceof DuplicateKeyException)
-            GTCommitOrRollback(StatusEnum.FALSE, StatusEnum.SQL_EXCEPTION);
-        else GTCommitOrRollback(StatusEnum.FALSE, StatusEnum.SERVER_EXCEPTION);
+        GTCommitOrRollback(StatusEnum.FALSE);
         GTContext.clear();//防止内存泄漏
     }
 
@@ -119,22 +115,20 @@ public class GTAspect
             return;
         }
         log.error("事务异常: {},隶属于全局事务: {},在全局事务中处于第{}位,开始向服务器推送【回滚】请求", e.getMessage(), GTContext.getXid(), GTContext.getBT().getExecuteOrder());
-        if (e instanceof SQLException || e instanceof DuplicateKeyException)
-            BTCommitOrRollback(StatusEnum.FALSE, StatusEnum.SQL_EXCEPTION);
-        else BTCommitOrRollback(StatusEnum.FALSE, StatusEnum.SERVER_EXCEPTION);
+        BTCommitOrRollback(StatusEnum.FALSE);
         GTContext.clear(); //防止内存泄漏
     }
 
 
-    private void GTCommitOrRollback(StatusEnum statusEnum, StatusEnum exceptionEnum)
+    private void GTCommitOrRollback(StatusEnum statusEnum)
     {
         AnnotationConfigApplicationContext ac = new AnnotationConfigApplicationContext(GTSocketClientAutoConfigure.class);
-        ac.getBean(SocketClient.class).GTTryToConnect(GTContext.getBT(), statusEnum.getMsg(), dataSource, GTContext.getSQLUndoLogs(), exceptionEnum);
+        ac.getBean(SocketClient.class).GTTryToConnect(GTContext.getBT(), statusEnum.getMsg(), dataSource, GTContext.getSQLUndoLogs());
     }
 
-    private void BTCommitOrRollback(StatusEnum statusEnum, StatusEnum exceptionEnum)
+    private void BTCommitOrRollback(StatusEnum statusEnum)
     {
         AnnotationConfigApplicationContext ac = new AnnotationConfigApplicationContext(GTSocketClientAutoConfigure.class);
-        ac.getBean(SocketClient.class).BTTryToConnect(GTContext.getBT(), statusEnum.getMsg(), dataSource, GTContext.getSQLUndoLogs(), exceptionEnum);
+        ac.getBean(SocketClient.class).BTTryToConnect(GTContext.getBT(), statusEnum.getMsg(), dataSource, GTContext.getSQLUndoLogs());
     }
 }

@@ -2,8 +2,8 @@ package cn.aurora.rpc;
 
 import cn.aurora.context.GTContext;
 import cn.aurora.entity.BT;
-import cn.aurora.entity.database.entity.SQLUndoLog;
 import cn.aurora.entity.database.UndoExecutorFactory;
+import cn.aurora.entity.database.entity.SQLUndoLog;
 import cn.aurora.entity.database.undoExecutor.AbstractUndoExecutor;
 import cn.aurora.enums.ReqPathEnum;
 import cn.aurora.enums.StatusEnum;
@@ -67,7 +67,7 @@ public class SocketClient
         log.debug("关闭连接,当前分支事务结束");
     }
 
-    private void judgeMessage(BT bt, DataSource dataSource, List<SQLUndoLog> sqlUndoLogs, StatusEnum exceptionEnum)
+    private void judgeMessage(BT bt, DataSource dataSource, List<SQLUndoLog> sqlUndoLogs)
     {
         boolean commitOrRollback = StatusEnum.TRUE.getMsg().equals(latestMessage);
         log.warn("{} | {} 号分支事务收到服务器指令: " + (commitOrRollback ? "【提交】" : "【回滚】"), bt.getXid(), bt.getExecuteOrder());
@@ -75,18 +75,13 @@ public class SocketClient
         {
             if (!commitOrRollback && sqlUndoLogs != null)
             {
-                int undoIndex = sqlUndoLogs.size() - 1;
-                switch (exceptionEnum)
-                {
-                    case NONE_EXCEPTION, SERVER_EXCEPTION -> undoIndex = sqlUndoLogs.size() - 1;
-                    case SQL_EXCEPTION -> undoIndex--;
-                }
-
                 try (Connection connection = dataSource.getConnection())
                 {
-                    for (int i = undoIndex; i >= 0; i--)
+                    for (int i = sqlUndoLogs.size() - 1; i >= 0; i--)
                     {
                         SQLUndoLog sqlUndoLog = sqlUndoLogs.get(i);
+                        if (!sqlUndoLog.getSqlExecStatus()) //如果状态是false,代表当前sql执行失败,是没有对数据造成修改的,不需要回滚,直接跳过
+                            continue;
                         if (sqlUndoLog.getBeforeImage() == null && sqlUndoLog.getAfterImage() == null)
                             continue;
                         AbstractUndoExecutor undoExecutor = UndoExecutorFactory.getUndoExecutor(sqlUndoLog.getSqlCommandType());
@@ -114,7 +109,7 @@ public class SocketClient
             log.warn("全局事务 {}" + (commitOrRollback ? "【提交】" : "【回滚】") + "成功,与服务器断开连接", bt.getXid());
     }
 
-    private void connectToServer(BT bt, String executeStatus, DataSource dataSource, List<SQLUndoLog> sqlUndoLogs, StatusEnum exceptionEnum)
+    private void connectToServer(BT bt, String executeStatus, DataSource dataSource, List<SQLUndoLog> sqlUndoLogs)
     {
         try
         {
@@ -130,23 +125,23 @@ public class SocketClient
             while (true)
                 if (flag.compareAndSet(true, false))
                     break;
-            judgeMessage(bt, dataSource, sqlUndoLogs, exceptionEnum);
+            judgeMessage(bt, dataSource, sqlUndoLogs);
         } catch (URISyntaxException | DeploymentException | IOException e)
         {
             log.error("隶属于全局事务{} | 【连接GT服务器出现异常】: {},已控制当前分支事务【回滚】,请检查是否已经成功启动【GT-server】", GTContext.getXid(), e.getMessage());
             latestMessage = StatusEnum.FALSE.getMsg();
-            judgeMessage(bt, dataSource, sqlUndoLogs, exceptionEnum);
+            judgeMessage(bt, dataSource, sqlUndoLogs);
         }
     }
 
     @Async(value = "asyncTaskExecutor")
-    public void BTTryToConnect(BT bt, String executeStatus, DataSource dataSource, List<SQLUndoLog> sqlUndoLogs, StatusEnum exceptionEnum)
+    public void BTTryToConnect(BT bt, String executeStatus, DataSource dataSource, List<SQLUndoLog> sqlUndoLogs)
     {
-        connectToServer(bt, executeStatus, dataSource, sqlUndoLogs, exceptionEnum);
+        connectToServer(bt, executeStatus, dataSource, sqlUndoLogs);
     }
 
-    public void GTTryToConnect(BT bt, String executeStatus, DataSource dataSource, List<SQLUndoLog> sqlUndoLogs, StatusEnum exceptionEnum)
+    public void GTTryToConnect(BT bt, String executeStatus, DataSource dataSource, List<SQLUndoLog> sqlUndoLogs)
     {
-        connectToServer(bt, executeStatus, dataSource, sqlUndoLogs, exceptionEnum);
+        connectToServer(bt, executeStatus, dataSource, sqlUndoLogs);
     }
 }
